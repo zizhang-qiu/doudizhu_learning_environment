@@ -1,0 +1,452 @@
+//
+// Created by qzz on 2024/5/31.
+//
+#include <iostream>
+#include "doudizhu_card.h"
+#include "doudizhu_move.h"
+
+using namespace doudizhu_learning_env;
+void CardTest() {
+  std::vector<DoudizhuCard> cards;
+
+  // 52 normal cards.
+  for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+    for (const Suit suit : kAllSuits) {
+      const DoudizhuCard card{rank, suit};
+      CHECK_TRUE(card.IsValid());
+      cards.push_back(card);
+    }
+  }
+
+  // 2Jokers
+  const DoudizhuCard black_joker{kBlackJoker, kInvalidSuit};
+  const DoudizhuCard red_joker{kRedJoker, kInvalidSuit};
+  CHECK_TRUE(black_joker.IsValid());
+  CHECK_TRUE(black_joker.IsJoker());
+  CHECK_TRUE(red_joker.IsValid());
+  CHECK_TRUE(red_joker.IsJoker());
+
+  cards.push_back(black_joker);
+  cards.push_back(red_joker);
+
+  const std::array<std::string, kNumCards> all_cards_str = {
+      "C3", "D3", "H3", "S3", "C4", "D4", "H4", "S4",
+      "C5", "D5", "H5", "S5", "C6", "D6", "H6", "S6",
+      "C7", "D7", "H7", "S7", "C8", "D8", "H8", "S8",
+      "C9", "D9", "H9", "S9", "CT", "DT", "HT", "ST",
+      "CJ", "DJ", "HJ", "SJ", "CQ", "DQ", "HQ", "SQ",
+      "CK", "DK", "HK", "SK", "CA", "DA", "HA", "SA",
+      "C2", "D2", "H2", "S2", "BJ", "RJ"
+  };
+
+  for (int i = 0; i < kNumCards; ++i) {
+    CHECK_EQ(cards[i].ToString(), all_cards_str[i]);
+  }
+
+  std::cout << "Passed card test." << std::endl;
+}
+
+void HandTest() {
+
+}
+
+void MoveTest() {
+  // Invalid.
+  {
+    const DoudizhuMove move{};
+    CHECK_EQ(move.ToString(), "I");
+  }
+
+  // Deal
+  for (const Suit suit : kAllSuits) {
+    for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+      const DoudizhuMove move({rank, suit});
+      std::string expected = "(Deal ";
+      expected.push_back(kSuitChar[suit]);
+      expected.push_back(kRankChar[rank]);
+      expected.push_back(')');
+//      std::cout << move.ToString() << std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+  }
+
+  {
+    DoudizhuMove deal_red_joker({kRedJoker, kInvalidSuit});
+    CHECK_EQ(deal_red_joker.ToString(), "(Deal RJ)");
+    DoudizhuMove deal_black_joker({kBlackJoker, kInvalidSuit});
+    CHECK_EQ(deal_black_joker.ToString(), "(Deal BJ)");
+  }
+
+  // Auction
+  const DoudizhuMove auction_pass{DoudizhuMove::AuctionType::kPass};
+  CHECK_EQ(auction_pass.ToString(), "(Pass)");
+  for (const auto auction_type : {DoudizhuMove::AuctionType::kOne,
+                                  DoudizhuMove::AuctionType::kTwo,
+                                  DoudizhuMove::AuctionType::kThree}) {
+    const DoudizhuMove move{auction_type};
+//    std::cout << move.ToString() <<std::endl;
+    CHECK_EQ(move.ToString(), "(Bid " + std::to_string(static_cast<int>(auction_type)) + ")");
+  }
+
+  // Play
+  // Solo/Pair/Trio/Bomb.
+  for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+    const DoudizhuMove solo_move{
+        /*play_type=*/DoudizhuMove::PlayType::kSolo,
+        /*single_rank=*/{rank, 1},
+        /*chain=*/{},
+        /*trio_comb=*/{},
+        /*quad_comb=*/{},
+        /*plane=*/{},
+        /*kickers=*/{}
+    };
+
+    std::string expected_solo_str = "(Play ";
+    expected_solo_str.push_back(kRankChar[rank]);
+    expected_solo_str.push_back(')');
+//    std::cout << solo_move.ToString() << std::endl;
+    CHECK_EQ(solo_move.ToString(), expected_solo_str);
+
+    const DoudizhuMove pair_move{
+        /*play_type=*/DoudizhuMove::PlayType::kPair,
+        /*single_rank=*/{rank, 2},
+        /*chain=*/{},
+        /*trio_comb=*/{},
+        /*quad_comb=*/{},
+        /*plane=*/{},
+        /*kickers=*/{}
+    };
+    std::string expected_pair_str = "(Play ";
+    expected_pair_str.push_back(kRankChar[rank]);
+    expected_pair_str.push_back(kRankChar[rank]);
+    expected_pair_str.push_back(')');
+    CHECK_EQ(pair_move.ToString(), expected_pair_str);
+
+    const DoudizhuMove trio_move{
+        /*play_type=*/DoudizhuMove::PlayType::kTrio,
+        /*single_rank=*/{rank, 3},
+        /*chain=*/{},
+        /*trio_comb=*/{},
+        /*quad_comb=*/{},
+        /*plane=*/{},
+        /*kickers=*/{}
+    };
+    std::string expected_trio_str = "(Play ";
+    expected_trio_str.push_back(kRankChar[rank]);
+    expected_trio_str.push_back(kRankChar[rank]);
+    expected_trio_str.push_back(kRankChar[rank]);
+    expected_trio_str.push_back(')');
+    CHECK_EQ(trio_move.ToString(), expected_trio_str);
+
+    const DoudizhuMove bomb_move{
+        /*play_type=*/DoudizhuMove::PlayType::kBomb,
+        /*single_rank=*/{rank, 4},
+        /*chain=*/{},
+        /*trio_comb=*/{},
+        /*quad_comb=*/{},
+        /*plane=*/{},
+        /*kickers=*/{}
+    };
+    std::string expected_bomb_str = "(Play ";
+    expected_bomb_str.push_back(kRankChar[rank]);
+    expected_bomb_str.push_back(kRankChar[rank]);
+    expected_bomb_str.push_back(kRankChar[rank]);
+    expected_bomb_str.push_back(kRankChar[rank]);
+    expected_bomb_str.push_back(')');
+    CHECK_EQ(bomb_move.ToString(), expected_bomb_str);
+  }
+
+  // Trio with solo.
+  for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+    for (int kicker = 0; kicker < kNumRanks; ++kicker) {
+      if (kicker == rank) {
+        continue;
+      }
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kTrioWithSolo,
+          /*single_rank=*/{},
+          /*chain=*/{},
+          /*trio_comb=*/{kSolo, rank},
+          /*quad_comb=*/{},
+          /*plane=*/{},
+          /*kickers=*/{kicker}
+      };
+      std::string expected{"(Play "};
+      for (int i = 0; i < kTrioLength; ++i) {
+        expected.push_back(kRankChar[rank]);
+      }
+      expected.push_back(kRankChar[kicker]);
+      expected.push_back(')');
+//      std::cout << move.ToString() <<std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+  }
+
+  // Trio with pair.
+  for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+    for (int kicker = 0; kicker < kNumCardsPerSuit; ++kicker) {
+      if (kicker == rank) {
+        continue;
+      }
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kTrioWithPair,
+          /*single_rank=*/{},
+          /*chain=*/{},
+          /*trio_comb=*/{kPair, rank},
+          /*quad_comb=*/{},
+          /*plane=*/{},
+          /*kickers=*/{kicker, kicker}
+      };
+      std::string expected{"(Play "};
+      for (int i = 0; i < kTrioLength; ++i) {
+        expected.push_back(kRankChar[rank]);
+      }
+      expected.push_back(kRankChar[kicker]);
+      expected.push_back(kRankChar[kicker]);
+      expected.push_back(')');
+//      std::cout << move.ToString() <<std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+  }
+
+  // Chain of solo.
+  for (int length = kChainOfSoloMinLength; length <= kChainOfSoloMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kChainOfSolo,
+          /*single_rank=*/{},
+          /*chain=*/{doudizhu_learning_env::ChainType::kSolo, length, start_rank},
+          /*trio_comb=*/{},
+          /*quad_comb=*/{},
+          /*plane=*/{},
+          /*kickers=*/{}
+      };
+      std::string expected{"(Play "};
+      for (int i = 0; i < length; ++i) {
+        expected.push_back(kRankChar[start_rank + i]);
+      }
+      expected.push_back(')');
+//      std::cout << move.ToString() << std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+  }
+
+  // Chain of pair.
+  for (int length = kChainOfPairMinLength; length <= kChainOfPairMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kChainOfPair,
+          /*single_rank=*/{},
+          /*chain=*/{doudizhu_learning_env::ChainType::kPair, length, start_rank},
+          /*trio_comb=*/{},
+          /*quad_comb=*/{},
+          /*plane=*/{},
+          /*kickers=*/{}
+      };
+      std::string expected{"(Play "};
+      for (int i = 0; i < length; ++i) {
+        expected.push_back(kRankChar[start_rank + i]);
+        expected.push_back(kRankChar[start_rank + i]);
+      }
+      expected.push_back(')');
+//      std::cout << move.ToString() << std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+  }
+
+  // Chain of trio.
+  for (int length = kChainOfTrioMinLength; length <= kChainOfTrioMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kChainOfTrio,
+          /*single_rank=*/{},
+          /*chain=*/{doudizhu_learning_env::ChainType::kTrio, length, start_rank},
+          /*trio_comb=*/{},
+          /*quad_comb=*/{},
+          /*plane=*/{},
+          /*kickers=*/{}
+      };
+      std::string expected{"(Play "};
+      for (int i = 0; i < length; ++i) {
+        expected.push_back(kRankChar[start_rank + i]);
+        expected.push_back(kRankChar[start_rank + i]);
+        expected.push_back(kRankChar[start_rank + i]);
+      }
+      expected.push_back(')');
+//      std::cout << move.ToString() << std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+  }
+
+  // Plane with solo.
+  int num_plane_with_solo = 0;
+  for (int length = kPlaneWithSoloMinLength; length <= kPlaneWithSoloMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
+      // Get possible kickers.
+      Plane plane{kSolo, length, start_rank};
+      const auto possible_kickers = GetPossibleKickers(plane);
+      for (const auto &kickers : possible_kickers) {
+        const DoudizhuMove move{
+            /*play_type=*/DoudizhuMove::PlayType::kPlaneWithSolo,
+            /*single_rank=*/{},
+            /*chain=*/{},
+            /*trio_comb=*/{},
+            /*quad_comb=*/{},
+            /*plane=*/plane,
+            /*kickers=*/kickers
+        };
+        ++num_plane_with_solo;
+
+        std::string expected{"(Play "};
+        for (int r = start_rank; r < start_rank + length; ++r) {
+          for (int i = 0; i < kTrioLength; ++i) {
+            expected.push_back(kRankChar[r]);
+          }
+        }
+        for (const int k : kickers) {
+          expected.push_back(kRankChar[k]);
+        }
+        expected.push_back(')');
+//        std::cout << move.ToString() << std::endl;
+        CHECK_EQ(expected, move.ToString());
+      }
+    }
+  }
+  CHECK_EQ(num_plane_with_solo, kNumPlaneWithSolos);
+//  std::cout << "num plane with solo: " << num_plane_with_solo << std::endl;
+
+  // Plane with solo.
+  int num_plane_with_pair = 0;
+  for (int length = kPlaneWithPairMinLength; length <= kPlaneWithPairMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
+      // Get possible kickers.
+      Plane plane{kPair, length, start_rank};
+      const auto possible_kickers = GetPossibleKickers(plane);
+      for (const auto &kickers : possible_kickers) {
+        const DoudizhuMove move{
+            /*play_type=*/DoudizhuMove::PlayType::kPlaneWithPair,
+            /*single_rank=*/{},
+            /*chain=*/{},
+            /*trio_comb=*/{},
+            /*quad_comb=*/{},
+            /*plane=*/plane,
+            /*kickers=*/kickers
+        };
+        ++num_plane_with_pair;
+
+        std::string expected{"(Play "};
+        for (int r = start_rank; r < start_rank + length; ++r) {
+          for (int i = 0; i < kTrioLength; ++i) {
+            expected.push_back(kRankChar[r]);
+          }
+        }
+        for (const int k : kickers) {
+          expected.push_back(kRankChar[k]);
+        }
+        expected.push_back(')');
+//        std::cout << move.ToString() << std::endl;
+        CHECK_EQ(expected, move.ToString());
+      }
+    }
+  }
+  CHECK_EQ(num_plane_with_pair, kNumPlaneWithPairs);
+//  std::cout << "num plane with pair: " << num_plane_with_pair << std::endl;
+
+  // Quad with solo.
+  int num_quad_with_solo = 0;
+  for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+    QuadComb quad_comb{kSolo, rank};
+    const auto kickers = GetPossibleKickers(quad_comb);
+    for (const auto &ks : kickers) {
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kQuadWithSolo,
+          /*single_rank=*/{},
+          /*chain=*/{},
+          /*trio_comb=*/{},
+          /*quad_comb=*/quad_comb,
+          /*plane=*/{},
+          /*kickers=*/ks
+      };
+      ++num_quad_with_solo;
+      std::string expected{"(Play "};
+      for (int i = 0; i < kQuadLength; ++i) {
+        expected.push_back(kRankChar[rank]);
+      }
+      for (const int k : ks) {
+        expected.push_back(kRankChar[k]);
+      }
+      expected.push_back(')');
+//      std::cout << move.ToString() << std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+
+  }
+  CHECK_EQ(num_quad_with_solo, kNumQuadWithSolos);
+
+  // Quad with solo.
+  int num_quad_with_pair = 0;
+  for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
+    QuadComb quad_comb{kPair, rank};
+    const auto kickers = GetPossibleKickers(quad_comb);
+    for (const auto &ks : kickers) {
+      const DoudizhuMove move{
+          /*play_type=*/DoudizhuMove::PlayType::kQuadWithPair,
+          /*single_rank=*/{},
+          /*chain=*/{},
+          /*trio_comb=*/{},
+          /*quad_comb=*/quad_comb,
+          /*plane=*/{},
+          /*kickers=*/ks
+      };
+      ++num_quad_with_pair;
+      std::string expected{"(Play "};
+      for (int i = 0; i < kQuadLength; ++i) {
+        expected.push_back(kRankChar[rank]);
+      }
+      for (const int k : ks) {
+        expected.push_back(kRankChar[k]);
+      }
+      expected.push_back(')');
+//      std::cout << move.ToString() << std::endl;
+      CHECK_EQ(move.ToString(), expected);
+    }
+
+  }
+  CHECK_EQ(num_quad_with_pair, kNumQuadWithPairs);
+
+  // Rocket
+  {
+    const DoudizhuMove move{
+      /*play_type=*/DoudizhuMove::PlayType::kRocket,
+      /*single_rank=*/{},
+      /*chain=*/{},
+      /*trio_comb=*/{},
+      /*quad_comb=*/{},
+      /*plane=*/{},
+      /*kickers=*/{}
+    };
+    CHECK_EQ(move.ToString(), "(Play BR)");
+  }
+
+  // Pass
+  {
+    const DoudizhuMove move{
+        /*play_type=*/DoudizhuMove::PlayType::kPass,
+        /*single_rank=*/{},
+        /*chain=*/{},
+        /*trio_comb=*/{},
+        /*quad_comb=*/{},
+        /*plane=*/{},
+        /*kickers=*/{}
+    };
+    CHECK_EQ(move.ToString(), "(Pass)");
+  }
+
+  std::cout << "Passed move test." << std::endl;
+}
+
+int main() {
+  CardTest();
+  MoveTest();
+  return 0;
+}

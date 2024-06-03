@@ -1,0 +1,19 @@
+add_library(doudizhu utils.h
+        utils.cc
+        doudizhu_game.cc
+        doudizhu_game.h
+        doudizhu_card.cc
+        doudizhu_card.h
+        doudizhu_utils.cc
+        doudizhu_utils.h
+        doudizhu_hand.cc
+        doudizhu_hand.h
+        doudizhu_move.cc
+        doudizhu_move.h)
+
+
+add_executable(doudizhu_test doudizhu_test.cc)
+target_link_libraries(doudizhu_test doudizhu)
+
+add_executable(test test.cc)
+target_link_libraries(test doudizhu)
