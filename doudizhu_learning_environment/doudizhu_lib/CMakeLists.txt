@@ -20,6 +20,8 @@ add_library(doudizhu utils.h
         doudizhu_observation.h
 )
 
+target_include_directories(doudizhu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 add_executable(doudizhu_test doudizhu_test.cc)
 target_link_libraries(doudizhu_test doudizhu)

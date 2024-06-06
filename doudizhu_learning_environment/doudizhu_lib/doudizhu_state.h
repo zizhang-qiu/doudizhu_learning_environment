@@ -61,7 +61,8 @@ class DoudizhuState {
   int Dizhu() const { return dizhu_; }
   int WinningBid() const { return winning_bid_; }
   int NumBombsPlayed() const { return num_bombs_played_; }
-  const std::vector<DoudizhuCard>& CardsLeftOver() const{return cards_left_over_;}
+  const std::vector<DoudizhuCard> &CardsLeftOver() const { return cards_left_over_; }
+  std::vector<double> Returns() const { return returns_; }
  private:
   DoudizhuDeck deck_;
   Phase phase_;
