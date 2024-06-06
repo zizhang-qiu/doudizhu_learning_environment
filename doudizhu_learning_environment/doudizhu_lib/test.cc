@@ -7,6 +7,7 @@
 #include "doudizhu_move.h"
 #include "doudizhu_game.h"
 #include "doudizhu_state.h"
+#include "doudizhu_observation.h"
 
 using namespace doudizhu_learning_env;
 using namespace std;
@@ -87,9 +88,11 @@ int main() {
   while (!state.IsTerminal()) {
     auto legal_moves = state.LegalMoves();
     auto move = UniformSample(legal_moves, rng);
-    std::cout << move.ToString() << std::endl;
+//    std::cout << move.ToString() << std::endl;
+    auto obs = DoudizhuObservation(state);
+    std::cout << obs.ToString() << std::endl;
     state.ApplyMove(move);
-    std::cout << state.ToString() << std::endl;
+//    std::cout << state.ToString() << std::endl;
   }
   std::cout << state.ToString() << std::endl;
   return 0;

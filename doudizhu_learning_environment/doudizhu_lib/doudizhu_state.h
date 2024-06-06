@@ -58,6 +58,10 @@ class DoudizhuState {
   std::shared_ptr<DoudizhuGame> ParentGame() const { return parent_game_; }
   const std::vector<DoudizhuHistoryItem> MoveHistory() const { return move_history_; }
   const std::array<uint8_t, kNumRanks> PlayedCardsPerRank() const { return played_cards_per_rank_; }
+  int Dizhu() const { return dizhu_; }
+  int WinningBid() const { return winning_bid_; }
+  int NumBombsPlayed() const { return num_bombs_played_; }
+  const std::vector<DoudizhuCard>& CardsLeftOver() const{return cards_left_over_;}
  private:
   DoudizhuDeck deck_;
   Phase phase_;

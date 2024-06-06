@@ -16,6 +16,8 @@ add_library(doudizhu utils.h
         doudizhu_state.h
         doudizhu_history_item.cc
         doudizhu_history_item.h
+        doudizhu_observation.cc
+        doudizhu_observation.h
 )
 
 
