@@ -11,7 +11,7 @@ int PlayerToOffset(int pid, int observer_pid);
 class DoudizhuObservation {
  public:
   DoudizhuObservation(const DoudizhuState &state, int observing_player);
-  DoudizhuObservation(const DoudizhuState &state) : DoudizhuObservation(state, state.CurrentPlayer()) {}
+  explicit DoudizhuObservation(const DoudizhuState &state) : DoudizhuObservation(state, state.CurrentPlayer()) {}
 
   int ObservingPlayer() const { return observing_player_; }
   int CurPlayerOffset() const { return cur_player_offset_; }
