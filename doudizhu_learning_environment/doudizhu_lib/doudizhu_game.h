@@ -52,7 +52,6 @@ class DoudizhuGame {
 
  private:
   GameParameters parameters_;
-  int dealer_ = -1;
   int seed_ = -1;
   mutable std::mt19937 rng_;
   // Save moves here for faster construction.

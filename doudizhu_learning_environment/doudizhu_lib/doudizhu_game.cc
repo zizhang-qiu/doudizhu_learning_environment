@@ -9,9 +9,6 @@ namespace doudizhu_learning_env {
 DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
   parameters_ = parameters;
 //  std::cout << "Enter constructor" << std::endl;
-  dealer_ = ParameterValue<int>(parameters_, "dealer", 0);
-  CHECK_GE(dealer_, 0);
-  CHECK_LT(dealer_, kNumPlayers);
   seed_ = ParameterValue<int>(parameters_, "seed", 42);
   rng_.seed(seed_);
 
