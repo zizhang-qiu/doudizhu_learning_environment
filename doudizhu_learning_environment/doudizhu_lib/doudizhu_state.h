@@ -26,7 +26,7 @@ class Trick {
     return winning_move_;
   }
   int Winner() const { return winning_player_; }
-  int leader() const { return leader_; }
+  int Leader() const { return leader_; }
  private:
   DoudizhuMove winning_move_;
   const int leader_;
@@ -42,7 +42,7 @@ enum class Phase {
 
 class DoudizhuState {
  public:
-  DoudizhuState(const std::shared_ptr<DoudizhuGame> &parent_game);
+  explicit DoudizhuState(const std::shared_ptr<DoudizhuGame> &parent_game);
   bool IsTerminal() const { return phase_ == Phase::kGameOver; }
   int CurrentPlayer() const;
   Phase CurrentPhase() const { return phase_; }
@@ -56,8 +56,8 @@ class DoudizhuState {
   const std::vector<DoudizhuHand> &Hands() const { return hands_; }
   const DoudizhuDeck &Deck() const { return deck_; }
   std::shared_ptr<DoudizhuGame> ParentGame() const { return parent_game_; }
-  const std::vector<DoudizhuHistoryItem> MoveHistory() const { return move_history_; }
-  const std::array<uint8_t, kNumRanks> PlayedCardsPerRank() const { return played_cards_per_rank_; }
+  const std::vector<DoudizhuHistoryItem>& MoveHistory() const { return move_history_; }
+  const std::array<uint8_t, kNumRanks>& PlayedCardsPerRank() const { return played_cards_per_rank_; }
   int Dizhu() const { return dizhu_; }
   int WinningBid() const { return winning_bid_; }
   int NumBombsPlayed() const { return num_bombs_played_; }
