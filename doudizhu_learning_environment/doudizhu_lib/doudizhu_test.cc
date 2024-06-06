@@ -5,6 +5,7 @@
 #include <fstream>
 #include <filesystem>
 #include "doudizhu_game.h"
+#include "doudizhu_state.h"
 
 using namespace doudizhu_learning_env;
 void CardTest() {
@@ -489,7 +490,7 @@ void GameTest() {
     for (int i = 0; i < kNumDistinctPlayMoves - 1; ++i) {
       std::string cur_move_str = all_moves[i + kNumBids + 1].ToString();
       cur_move_str = cur_move_str.substr(6, cur_move_str.length() - 6 - 1);
-      if(!MoveStringEqual(cur_move_str, expected_move_strings[i])){
+      if (!MoveStringEqual(cur_move_str, expected_move_strings[i])) {
         std::cout << cur_move_str << ", ";
         std::cout << expected_move_strings[i] << std::endl;
       }
@@ -500,19 +501,59 @@ void GameTest() {
   } else {
     std::cerr << "Failed to open file" << std::endl;
   }
+}
 
-
-//  for (int i = 0;
-//       i < all_moves.size();
-//       ++i) {
-//    std::cout << all_moves[i].ToString() << std::endl;
-//  }
+void RandomSimTest(bool verbose, int seed) {
+  std::mt19937 rng;
+  rng.seed(seed);
+  GameParameters params = {
+      {"seed", std::to_string(seed)}
+  };
+  std::shared_ptr<DoudizhuGame> game = std::make_shared<DoudizhuGame>(params);
+  DoudizhuState state(game);
+  while (!state.IsTerminal()) {
+    // Chance node.
+    if (state.CurrentPlayer() == kChancePlayerId) {
+      auto chance_outcomes = state.ChanceOutcomes();
+      std::discrete_distribution<std::mt19937::result_type> dist(
+          chance_outcomes.second.begin(), chance_outcomes.second.end());
+      auto move = chance_outcomes.first[dist(rng)];
+      if (verbose) {
+        std::cout << "Legal chance:";
+        for (int i = 0; i < chance_outcomes.first.size(); ++i) {
+          std::cout << " <" << chance_outcomes.first[i].ToString() << ", " << chance_outcomes.second[i] << ">";
+        }
+        std::cout << "\n";
+        std::cout << "Sampled move: " << move.ToString() << "\n\n";
+      }
+      state.ApplyMove(move);
+      continue;
+    }
+    const auto legal_moves = state.LegalMoves();
+    std::uniform_int_distribution<std::mt19937::result_type> dist(
+        0, legal_moves.size() - 1);
+    auto move = legal_moves[dist(rng)];
+    if (verbose) {
+      std::cout << "Current player: " << state.CurrentPlayer() << "\n";
+      std::cout << state.ToString() << "\n\n";
+      std::cout << "Legal moves:";
+      for (int i = 0; i < legal_moves.size(); ++i) {
+        std::cout << " " << legal_moves[i].ToString();
+      }
+      std::cout << "\n";
+      std::cout << "Sampled move: " << move.ToString() << "\n\n";
+    }
+    state.ApplyMove(move);
+  }
+  if (verbose) {
+    std::cout << "Game done, terminal state:\n" << state.ToString() << "\n\n";
+  }
 }
 
 int main() {
 //  CardTest();
 //  MoveTest();
-  GameTest();
-
+//  GameTest();
+  RandomSimTest(true, 42);
   return 0;
 }

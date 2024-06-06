@@ -193,6 +193,7 @@ std::vector<int> DoudizhuMove::ToRanks() const {
       for (const int k : kickers_) {
         ranks.push_back(k);
       }
+      return ranks;
     }
     case PlayType::kChainOfSolo:
     case PlayType::kChainOfPair:
@@ -214,6 +215,7 @@ std::vector<int> DoudizhuMove::ToRanks() const {
       for (const int k : kickers_) {
         ranks.push_back(k);
       }
+      return ranks;
     }
     case PlayType::kQuadWithSolo:
     case PlayType::kQuadWithPair: {

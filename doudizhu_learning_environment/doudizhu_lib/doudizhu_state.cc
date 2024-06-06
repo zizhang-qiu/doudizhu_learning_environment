@@ -48,7 +48,7 @@ bool DoudizhuState::AuctionIsLegal(const DoudizhuMove &move) const {
 }
 void DoudizhuState::ApplyDealMove(const DoudizhuMove &move) {
   if (current_player_ != kLeftOverPlayer) {
-    std::cout << "Player to deal: " << PlayerToDeal() << std::endl;
+//    std::cout << "Player to deal: " << PlayerToDeal() << std::endl;
     hands_[PlayerToDeal()].AddCard(move.DealCard());
   } else {
     cards_left_over_.push_back(move.DealCard());
