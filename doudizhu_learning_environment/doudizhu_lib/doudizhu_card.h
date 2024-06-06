@@ -40,5 +40,10 @@ class DoudizhuCard {
   int rank_ = -1;
   Suit suit_ = kInvalidSuit;
 };
+
+int Uid2Rank(int card_uid);
+Suit Uid2Suit(int card_uid);
+int CardIndex(int rank, Suit suit);
+int CardIndex(const DoudizhuCard &card);
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_CARD_H_

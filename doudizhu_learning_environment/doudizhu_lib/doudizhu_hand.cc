@@ -2,22 +2,28 @@
 // Created by qzz on 2024/6/1.
 //
 
+#include <iostream>
 #include "doudizhu_hand.h"
 namespace doudizhu_learning_env {
 
 void DoudizhuHand::AddCard(const DoudizhuCard &card) {
   CHECK_TRUE(card.IsValid());
   CHECK_TRUE(CanAdd(card.CardRank()));
+//  std::cout << ToString() << std::endl;
   ++cards_per_rank_[card.CardRank()];
   ++num_cards_;
 }
 
-void DoudizhuHand::RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> *played_cards_per_rank) {
+void DoudizhuHand::RemoveFromHand(int rank) {
   CHECK_GE(rank, 0);
   CHECK_LE(rank, kRedJoker);
   CHECK_TRUE(CanRemove(rank));
   --cards_per_rank_[rank];
   --num_cards_;
+}
+
+void DoudizhuHand::RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> *played_cards_per_rank) {
+  RemoveFromHand(rank);
   ++(*played_cards_per_rank)[rank];
 }
 

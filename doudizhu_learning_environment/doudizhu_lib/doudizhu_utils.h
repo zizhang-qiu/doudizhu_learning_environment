@@ -6,6 +6,11 @@
 #define DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_
 #include "utils.h"
 namespace doudizhu_learning_env {
+inline constexpr int kInvalidPlayer = -1;
+inline constexpr int kLeftOverPlayer = -2;
+inline constexpr int kChancePlayerId = -3;
+inline constexpr int kTerminalPlayerId = -4;
+
 inline constexpr int kNumPlayers = 3;
 inline constexpr int kNumCards = 54;
 
@@ -31,6 +36,8 @@ inline constexpr int kNumRanks = kNumCardsPerSuit + 2;
 inline constexpr int kNumCardsLeftOver = 3;
 
 inline constexpr int kNumSuits = 4;
+
+inline constexpr int kNumFarmerCards = (kNumCards - 3) / 3;
 
 inline constexpr int kChainOfSoloMinLength = 5; // 34567
 inline constexpr int kChainOfSoloMaxLength = 12; // 3456789TJQKA
@@ -98,7 +105,7 @@ inline constexpr int kNumBombs = kNumCardsPerSuit;
 inline constexpr int kNumRockets = 1; // BR.
 inline constexpr int kNumPasses = 1;
 
-inline constexpr int kNumDistinctMoves = kNumSolos
+inline constexpr int kNumDistinctPlayMoves = kNumSolos
     + kNumPairs
     + kNumTrios
     + kNumTrioWithSolos
@@ -114,9 +121,13 @@ inline constexpr int kNumDistinctMoves = kNumSolos
     + kNumRockets
     + kNumPasses;
 
+inline constexpr int kNumDistinctMoves =
+    kNumCards + kNumBids + 1 + kNumDistinctPlayMoves;
+
 constexpr char kSuitChar[] = "CDHS";
 constexpr char kRankChar[] = "3456789TJQKA2BR";
 
 constexpr char kAllCardRankChar[] = "3333444455556666777788889999TTTTJJJJQQQQKKKKAAAA2222BR";
+
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_

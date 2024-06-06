@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <optional>
+#include <random>
 
 namespace doudizhu_learning_env {
 
@@ -23,8 +24,7 @@ constexpr int Combination(int n, int r) {
 
   long res = 1;
 
-  for (int k = 1; k <= r; ++k)
-  {
+  for (int k = 1; k <= r; ++k) {
     res *= n - k + 1;
     res /= k;
   }
@@ -32,9 +32,13 @@ constexpr int Combination(int n, int r) {
   return res;
 }
 
-void CombineHelper(const std::vector<int>& nums, int k, int start, std::vector<int>& current, std::vector<std::vector<int>>& result);
+void CombineHelper(const std::vector<int> &nums,
+                   int k,
+                   int start,
+                   std::vector<int> &current,
+                   std::vector<std::vector<int>> &result);
 
-std::vector<std::vector<int>> Combine(const std::vector<int>& nums, int k);
+std::vector<std::vector<int>> Combine(const std::vector<int> &nums, int k);
 
 // Make sure that arbitrary structures can be printed out.
 template<typename T>
@@ -83,6 +87,15 @@ template<typename T>
 std::ostream &operator<<(std::ostream &stream, const std::optional<T> &v) {
   return stream << *v;
 }
+
+template<typename T>
+T UniformSample(const std::vector<T> &vec, std::mt19937 &rng) {
+  std::uniform_int_distribution<int> dis(0, vec.size() - 1);
+  const int index = dis(rng);
+  return vec[index];
+}
+
+using GameParameters = std::unordered_map<std::string, std::string>;
 
 // Returns string associated with key in params, parsed as template type.
 // If key is not in params, returns the provided default value.

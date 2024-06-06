@@ -1,7 +1,5 @@
 add_library(doudizhu utils.h
         utils.cc
-        doudizhu_game.cc
-        doudizhu_game.h
         doudizhu_card.cc
         doudizhu_card.h
         doudizhu_utils.cc
@@ -9,7 +7,16 @@ add_library(doudizhu utils.h
         doudizhu_hand.cc
         doudizhu_hand.h
         doudizhu_move.cc
-        doudizhu_move.h)
+        doudizhu_move.h
+        doudizhu_game.cc
+        doudizhu_game.h
+        doudizhu_deck.cc
+        doudizhu_deck.h
+        doudizhu_state.cc
+        doudizhu_state.h
+        doudizhu_history_item.cc
+        doudizhu_history_item.h
+)
 
 
 add_executable(doudizhu_test doudizhu_test.cc)

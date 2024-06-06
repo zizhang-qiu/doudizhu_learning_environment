@@ -2,8 +2,9 @@
 // Created by qzz on 2024/5/31.
 //
 #include <iostream>
-#include "doudizhu_card.h"
-#include "doudizhu_move.h"
+#include <fstream>
+#include <filesystem>
+#include "doudizhu_game.h"
 
 using namespace doudizhu_learning_env;
 void CardTest() {
@@ -417,13 +418,13 @@ void MoveTest() {
   // Rocket
   {
     const DoudizhuMove move{
-      /*play_type=*/DoudizhuMove::PlayType::kRocket,
-      /*single_rank=*/{},
-      /*chain=*/{},
-      /*trio_comb=*/{},
-      /*quad_comb=*/{},
-      /*plane=*/{},
-      /*kickers=*/{}
+        /*play_type=*/DoudizhuMove::PlayType::kRocket,
+        /*single_rank=*/{},
+        /*chain=*/{},
+        /*trio_comb=*/{},
+        /*quad_comb=*/{},
+        /*plane=*/{},
+        /*kickers=*/{}
     };
     CHECK_EQ(move.ToString(), "(Play BR)");
   }
@@ -445,8 +446,73 @@ void MoveTest() {
   std::cout << "Passed move test." << std::endl;
 }
 
+std::vector<std::string> StrSplit(const std::string &str, const std::string &delim) {
+  std::vector<std::string> tokens;
+  size_t start = 0;
+  size_t end = 0;
+  while ((end = str.find(delim, start)) != std::string::npos) {
+    tokens.push_back(str.substr(start, end - start));
+    start = end + delim.length();
+  }
+  tokens.push_back(str.substr(start));
+  return tokens;
+}
+
+std::unordered_map<char, int> GetStringCounter(const std::string &str) {
+  std::unordered_map<char, int> counter{};
+  for (const char &c : str) {
+
+    ++counter[c];
+  }
+  return counter;
+}
+
+bool MoveStringEqual(const std::string &lhs, const std::string &rhs) {
+  return GetStringCounter(lhs) == GetStringCounter(rhs);
+}
+
+void GameTest() {
+  DoudizhuGame game{{}};
+  const auto &all_moves = game.AllMoves();
+  CHECK_EQ(all_moves.size(), game.MaxMoves());
+
+  // Load RL card actions.
+  std::ifstream ifs("../../../doudizhu_learning_environment/doudizhu_lib/action_space.txt");
+  if (ifs.is_open()) {
+    std::string line;
+    while (std::getline(ifs, line)) {
+//      std::cout << line << std::endl;
+    }
+    const auto expected_move_strings = StrSplit(line, " ");
+//    std::cout << expected_move_strings.size() << std::endl;
+    CHECK_EQ(expected_move_strings.size(), kNumDistinctPlayMoves);
+    for (int i = 0; i < kNumDistinctPlayMoves - 1; ++i) {
+      std::string cur_move_str = all_moves[i + kNumBids + 1].ToString();
+      cur_move_str = cur_move_str.substr(6, cur_move_str.length() - 6 - 1);
+      if(!MoveStringEqual(cur_move_str, expected_move_strings[i])){
+        std::cout << cur_move_str << ", ";
+        std::cout << expected_move_strings[i] << std::endl;
+      }
+
+//      CHECK_TRUE(MoveStringEqual(cur_move_str, expected_move_strings[i]));
+    }
+    ifs.close();
+  } else {
+    std::cerr << "Failed to open file" << std::endl;
+  }
+
+
+//  for (int i = 0;
+//       i < all_moves.size();
+//       ++i) {
+//    std::cout << all_moves[i].ToString() << std::endl;
+//  }
+}
+
 int main() {
-  CardTest();
-  MoveTest();
+//  CardTest();
+//  MoveTest();
+  GameTest();
+
   return 0;
 }

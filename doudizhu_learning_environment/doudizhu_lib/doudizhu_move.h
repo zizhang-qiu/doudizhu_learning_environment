@@ -67,10 +67,9 @@ struct QuadComb {
   }
 };
 
-std::vector<std::vector<int>> GetPossibleKickers(const TrioComb& trio_comb);
+std::vector<std::vector<int>> GetPossibleKickers(const TrioComb &trio_comb);
 
-std::vector<std::vector<int>> GetPossibleKickers(const QuadComb& quad_comb);
-
+std::vector<std::vector<int>> GetPossibleKickers(const QuadComb &quad_comb);
 
 // Plane with solo/pair.
 struct Plane {
@@ -86,7 +85,7 @@ struct Plane {
   }
 };
 
-std::vector<std::vector<int>> GetPossibleKickers(const Plane& plane);
+std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane);
 
 class DoudizhuMove {
  public:
@@ -99,7 +98,7 @@ class DoudizhuMove {
 
   enum class AuctionType {
     kInvalid = -1,
-    kPass,
+    kPass = 0,
     kOne,
     kTwo,
     kThree
@@ -111,6 +110,7 @@ class DoudizhuMove {
     kSolo,
     kPair,
     kTrio,
+    kBomb,
     kTrioWithSolo,
     kTrioWithPair,
     kChainOfSolo,
@@ -120,7 +120,6 @@ class DoudizhuMove {
     kPlaneWithPair,
     kQuadWithSolo,
     kQuadWithPair,
-    kBomb,
     kRocket
   };
 
@@ -174,13 +173,52 @@ class DoudizhuMove {
         plane_(plane),
         kickers_(kickers) {}
 
+  DoudizhuMove(const DoudizhuMove &) = default;
+
   std::string ToString() const;
 
   bool operator==(const DoudizhuMove &other_move) const;
 
+  Type MoveType() const { return move_type_; }
+
+  DoudizhuCard DealCard() const { return deal_card_; }
+
+  AuctionType Auction() const { return auction_type_; }
+
+  PlayType GetPlayType() const { return play_type_; }
+
+  SingleRank GetSingleRank() const { return single_rank_; }
+
+  Chain GetChain() const { return chain_; }
+
+  TrioComb GetTrioComb() const { return trio_comb_; }
+
+  QuadComb GetQuadComb() const { return quad_comb_; }
+
+  Plane GetPlane() const { return plane_; }
+
+  std::vector<int> Kickers() const { return kickers_; }
+
+  bool IsBomb() const { return play_type_ == PlayType::kBomb || play_type_ == PlayType::kRocket; }
+
+  int BombRank() const {
+    CHECK_TRUE(IsBomb());
+    if (play_type_ == PlayType::kRocket) {
+      return kBlackJoker;
+    }
+    if (play_type_ == PlayType::kBomb) {
+      return single_rank_.rank;
+    }
+    return -1;
+  }
+
+  std::vector<int> ToRanks() const;
+
+  // Some moves created by users may be invalid, use this function to check validity.
+  bool IsValid(bool check_kickers = false) const;
  private:
   Type move_type_ = kInvalid;
-  AuctionType auction_type_ = AuctionType::kInvalid;
+  enum AuctionType auction_type_ = AuctionType::kInvalid;
   PlayType play_type_ = PlayType::kInvalid;
   DoudizhuCard deal_card_{};
   SingleRank single_rank_;
@@ -189,7 +227,8 @@ class DoudizhuMove {
   QuadComb quad_comb_{};
   Plane plane_{};
   std::vector<int> kickers_{};
-
 };
+
+bool HandCanMakeMove(const DoudizhuHand& hand, const DoudizhuMove& move);
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_MOVE_H_
