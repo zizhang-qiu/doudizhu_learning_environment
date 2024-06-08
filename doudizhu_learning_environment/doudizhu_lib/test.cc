@@ -22,6 +22,11 @@ bool HasThreeOrGreaterEqualWithTarget(const std::vector<int> &nums, int target) 
   }
   return false;
 }
+
+void Test(std::array<int, 3>& arr) {
+  ++(arr)[0];
+}
+
 int main() {
 //  TrioComb trio_comb{kSolo, 0};
 //  auto kickers = GetPossibleKickers(trio_comb);
@@ -68,32 +73,36 @@ int main() {
 //}
 
 //  std::cout << std::boolalpha << HasThreeOrGreaterEqualWithTarget({6, 6, 6, 0}, 5) << std::endl;
-  GameParameters params = {
-      {"seed", "2"}
-  };
-  const auto game = DoudizhuGame(params);
-  const auto &all_moves = game.AllChanceOutcomes();
-//  for (const auto &move : all_moves) {
-//    if (!move.IsValid()) {
-//      std::cout << move.ToString() << std::endl;
-//    }
+//  GameParameters params = {
+//      {"seed", "2"}
+//  };
+//  const auto game = DoudizhuGame(params);
+//  const auto &all_moves = game.AllChanceOutcomes();
+////  for (const auto &move : all_moves) {
+////    if (!move.IsValid()) {
+////      std::cout << move.ToString() << std::endl;
+////    }
+////  }
+//  std::mt19937 rng(42);
+//  auto state = DoudizhuState(std::make_shared<DoudizhuGame>(game));
+//  std::cout << state.ToString() << std::endl;
+//  while (state.CurrentPhase() == Phase::kDeal) {
+//    state.ApplyRandomChance();
 //  }
-  std::mt19937 rng(42);
-  auto state = DoudizhuState(std::make_shared<DoudizhuGame>(game));
-  std::cout << state.ToString() << std::endl;
-  while (state.CurrentPhase() == Phase::kDeal) {
-    state.ApplyRandomChance();
-  }
-  std::cout << state.ToString() << std::endl;
-  while (!state.IsTerminal()) {
-    auto legal_moves = state.LegalMoves();
-    auto move = UniformSample(legal_moves, rng);
-//    std::cout << move.ToString() << std::endl;
-    auto obs = DoudizhuObservation(state);
-    std::cout << obs.ToString() << std::endl;
-    state.ApplyMove(move);
-//    std::cout << state.ToString() << std::endl;
-  }
-  std::cout << state.ToString() << std::endl;
+//  std::cout << state.ToString() << std::endl;
+//  while (!state.IsTerminal()) {
+//    auto legal_moves = state.LegalMoves();
+//    auto move = UniformSample(legal_moves, rng);
+////    std::cout << move.ToString() << std::endl;
+//    auto obs = DoudizhuObservation(state);
+//    std::cout << obs.ToString() << std::endl;
+//    state.ApplyMove(move);
+////    std::cout << state.ToString() << std::endl;
+//  }
+//  std::cout << state.ToString() << std::endl;
+  std::array<int, 3> arr = {1, 1, 1};
+  Test(arr);
+
+  std::cout << arr << std::endl;
   return 0;
 }

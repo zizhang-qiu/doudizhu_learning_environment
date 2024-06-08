@@ -15,13 +15,17 @@ class DoudizhuHand {
 
   DoudizhuHand(const DoudizhuHand &) = default;
 
+  bool operator==(const DoudizhuHand &other_hand) const { return cards_per_rank_ == other_hand.cards_per_rank_; }
+
   std::string ToString() const;
 
   void AddCard(const DoudizhuCard &card);
 
+  void AddCard(int rank);
+
   void RemoveFromHand(int rank);
 
-  void RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> *played_cards_per_rank);
+  void RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> &played_cards_per_rank);
 
   int Size() const { return num_cards_; }
 

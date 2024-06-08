@@ -14,6 +14,12 @@ void DoudizhuHand::AddCard(const DoudizhuCard &card) {
   ++num_cards_;
 }
 
+void DoudizhuHand::AddCard(int rank) {
+  CHECK_TRUE(CanAdd(rank));
+  ++cards_per_rank_[rank];
+  ++num_cards_;
+}
+
 void DoudizhuHand::RemoveFromHand(int rank) {
   CHECK_GE(rank, 0);
   CHECK_LE(rank, kRedJoker);
@@ -22,12 +28,15 @@ void DoudizhuHand::RemoveFromHand(int rank) {
   --num_cards_;
 }
 
-void DoudizhuHand::RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> *played_cards_per_rank) {
+void DoudizhuHand::RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> &played_cards_per_rank) {
   RemoveFromHand(rank);
-  ++(*played_cards_per_rank)[rank];
+  ++(played_cards_per_rank)[rank];
 }
 
 bool DoudizhuHand::CanAdd(int rank) const {
+  if (rank < 0 || rank > kRedJoker) {
+    return false;
+  }
   // A hand can only have 1 R/B Joker.
   if (rank == kBlackJoker || rank == kRedJoker) {
     return cards_per_rank_[rank] == 0;
@@ -38,6 +47,9 @@ bool DoudizhuHand::CanAdd(int rank) const {
 
 }
 bool DoudizhuHand::CanRemove(int rank) const {
+  if (rank < 0 || rank > kRedJoker) {
+    return false;
+  }
   return cards_per_rank_[rank] > 0;
 }
 

@@ -101,7 +101,7 @@ void DoudizhuState::ApplyAuctionMove(const DoudizhuMove &move) {
 bool DoudizhuState::AfterPlayHand(int player, const DoudizhuMove &move) {
   const auto ranks = move.ToRanks();
   for (const int rank : ranks) {
-    hands_[player].RemoveFromHand(rank, &played_cards_per_rank_);
+    hands_[player].RemoveFromHand(rank, played_cards_per_rank_);
   }
   bool flag = true;
   for (int rank = 0; rank < kNumRanks; ++rank) {
