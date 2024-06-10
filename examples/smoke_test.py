@@ -306,6 +306,24 @@ class SmokeTest(unittest.TestCase):
 
         os.remove("temp_state")
 
+    def test_doudizhu_observation(self):
+        params = {}
+        game = pydoudizhu.DoudizhuGame(params)
+        state = pydoudizhu.DoudizhuState(parent_game=game)
+
+        while state.current_phase() == pydoudizhu.Phase.DEAL:
+            state.apply_random_chance()
+
+        while state.current_phase() == pydoudizhu.Phase.AUCTION:
+            legal_moves = state.legal_moves()
+            random_move = random.choice(legal_moves)
+            state.apply_move(random_move)
+
+        obs = pydoudizhu.DoudizhuObservation(state)
+        self.assertEqual(obs.dizhu(), state.dizhu())
+        self.assertEqual(obs.winning_bid(), state.winning_bid())
+        self.assertEqual(obs.num_bombs_played(), state.num_bombs_played())
+
 
 if __name__ == '__main__':
     unittest.main()

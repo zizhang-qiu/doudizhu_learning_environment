@@ -5,6 +5,7 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 #include "doudizhu_state.h"
+#include "doudizhu_observation.h"
 
 namespace py = pybind11;
 
@@ -481,6 +482,22 @@ PYBIND11_MODULE(pydoudizhu, m) {
             return state;
           }
       ));
+
+  py::class_<DoudizhuObservation>(m, "DoudizhuObservation")
+      .def(py::init<const DoudizhuState &, int>(), py::arg("state"), py::arg("observing_player"))
+      .def(py::init<const DoudizhuState &>(), py::arg("state"))
+      .def("observing_player", &DoudizhuObservation::ObservingPlayer)
+      .def("cur_player_offset", &DoudizhuObservation::CurPlayerOffset)
+      .def("dizhu", &DoudizhuObservation::Dizhu)
+      .def("cards_left_over", &DoudizhuObservation::CardsLeftOver)
+      .def("current_phase", &DoudizhuObservation::CurrentPhase)
+      .def("winning_bid", &DoudizhuObservation::WinningBid)
+      .def("num_bombs_played", &DoudizhuObservation::NumBombsPlayed)
+      .def("hands", &DoudizhuObservation::Hands)
+      .def("auction_history", &DoudizhuObservation::AuctionHistory)
+      .def("play_history", &DoudizhuObservation::PlayHistory)
+      .def("__repr__", &DoudizhuObservation::ToString)
+      .def("__eq__", &DoudizhuObservation::operator==);
 
 }
 }

@@ -19,10 +19,12 @@ class DoudizhuObservation {
   Phase CurrentPhase() const { return current_phase_; }
   int WinningBid() const { return winning_bid_; }
   int NumBombsPlayed() const { return num_bombs_played_; }
+  const std::vector<DoudizhuCard> &CardsLeftOver() const { return cards_left_over_; }
   const std::vector<DoudizhuHand> &Hands() const { return hands_; }
   const std::vector<DoudizhuHistoryItem> &AuctionHistory() const { return auction_history_; }
   const std::vector<DoudizhuHistoryItem> &PlayHistory() const { return play_history_; }
   std::string ToString() const;
+  bool operator==(const DoudizhuObservation &other_obs) const { return ToString() == other_obs.ToString(); }
  private:
   int observing_player_;
   int cur_player_offset_; // offset of current_player_ from observing_player
