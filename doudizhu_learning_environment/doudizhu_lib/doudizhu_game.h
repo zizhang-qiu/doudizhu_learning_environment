@@ -13,7 +13,7 @@ namespace doudizhu_learning_env {
 
 class DoudizhuGame {
  public:
-  DoudizhuGame(const GameParameters &parameters);
+  explicit DoudizhuGame(const GameParameters &parameters);
 
   const std::vector<DoudizhuMove> &AllMoves() const {
     return moves_;
@@ -43,12 +43,18 @@ class DoudizhuGame {
     return kMaxAuctionLength + kNumCards * kNumPlayers;
   }
 
+  GameParameters Parameters() const { return parameters_; }
+
   DoudizhuMove GetMove(int uid) const { return moves_[uid]; }
 
   DoudizhuMove GetChanceOutcome(int uid) const { return chance_outcomes_[uid]; }
 
   DoudizhuMove PickRandomChance(const std::pair<std::vector<DoudizhuMove>,
                                                 std::vector<double>> &chance_outcomes) const;
+
+  bool operator==(const DoudizhuGame &other_game) {
+    return parameters_ == other_game.parameters_;
+  }
 
  private:
   GameParameters parameters_;
@@ -79,14 +85,9 @@ class DoudizhuGame {
 
   DoudizhuMove ConstructChanceOutcome(int uid) const;
   DoudizhuMove ConstructMove(int uid) const;
-
-  int GetTrioWithSoloRank(int rank, int remainder) const;
-  int GetTrioWithPairRank(int rank, int remainder) const;
   std::pair<int, int> GetChainOfSoloLengthAndStartRank(int uid) const;
   std::pair<int, int> GetChainOfPairLengthAndStartRank(int uid) const;
   std::pair<int, int> GetChainOfTrioLengthAndStartRank(int uid) const;
-//  std::pair<int, std::vector<int>> GetLength2PlaneWithSolosStartRankAndKickers(int uid) const;
-//  std::pair<int, std::vector<int>> GetLength3PlaneWithSolosStartRankAndKickers(int uid) const;
 };
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_GAME_H_

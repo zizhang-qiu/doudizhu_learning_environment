@@ -219,7 +219,6 @@ class SmokeTest(unittest.TestCase):
             plane_with_solo_move,
             plane_with_pair_move,
             rocket_move]:
-
             with open("temp_move", "wb") as fp:
                 pickle.dump(move, fp)
 
@@ -229,6 +228,46 @@ class SmokeTest(unittest.TestCase):
             self.assertEqual(move, loaded_move)
 
             os.remove("temp_move")
+
+    def test_doudizhu_deck(self):
+        deck = pydoudizhu.DoudizhuDeck()
+        self.assertEqual(deck.size(), pydoudizhu.NUM_CARDS)
+
+        card = deck.deal_card(rank=0, suit=pydoudizhu.Suit.CLUBS_SUIT)
+        self.assertEqual(deck.size(), pydoudizhu.NUM_CARDS - 1)
+        self.assertEqual(card, pydoudizhu.DoudizhuCard(0, pydoudizhu.Suit.CLUBS_SUIT))
+
+        self.assertTrue(deck.card_in_deck(rank=0, suit=pydoudizhu.Suit.DIAMONDS_SUIT))
+        self.assertFalse(deck.card_in_deck(rank=0, suit=pydoudizhu.Suit.CLUBS_SUIT))
+
+        with open("temp_deck", "wb") as fp:
+            pickle.dump(deck, fp)
+
+        with open("temp_deck", "rb") as fp:
+            loaded_deck = pickle.load(fp)
+
+        self.assertEqual(deck, loaded_deck)
+
+        os.remove("temp_deck")
+
+    def test_doudizhu_game(self):
+        params = {}
+        game = pydoudizhu.DoudizhuGame(params)
+        self.assertEqual(len(game.all_moves()), 27472 + 4)
+        self.assertEqual(len(game.all_chance_outcomes()), pydoudizhu.NUM_CARDS)
+        self.assertEqual(game.parameters(), params)
+        with open("temp_game", "wb") as fp:
+            pickle.dump(game, fp)
+
+        with open("temp_game", "rb") as fp:
+            loaded_game = pickle.load(fp)
+
+        self.assertEqual(game, loaded_game)
+
+        os.remove("temp_game")
+
+
+
 
 
 if __name__ == '__main__':

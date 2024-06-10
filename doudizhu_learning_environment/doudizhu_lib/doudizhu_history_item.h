@@ -7,11 +7,14 @@
 #include "doudizhu_move.h"
 namespace doudizhu_learning_env {
 struct DoudizhuHistoryItem {
-  DoudizhuHistoryItem(const DoudizhuMove &move_made) : move(move_made) {}
+  explicit DoudizhuHistoryItem(const DoudizhuMove &move_made) : move(move_made) {}
 
   DoudizhuHistoryItem(const DoudizhuHistoryItem &past_move) = default;
 
   std::string ToString() const;
+  bool operator==(const DoudizhuHistoryItem &other_item) const {
+    return move == other_item.move && player == other_item.player && deal_to_player == other_item.deal_to_player;
+  }
 
   DoudizhuMove move;
   int player = kInvalidPlayer;

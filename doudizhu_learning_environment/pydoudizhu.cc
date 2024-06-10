@@ -18,25 +18,20 @@ void CheckPyTupleSize(const py::tuple &t, const size_t size) {
   }
 }
 
-void Test(std::vector<int> &arr) {
-  ++arr[0];
-  ++arr[1];
-}
-
 PYBIND11_MODULE(pydoudizhu, m) {
   py::enum_<Suit>(m, "Suit")
       .value("INVALID_SUIT", Suit::kInvalidSuit)
       .value("CLUBS_SUIT", Suit::kClubsSuit)
-      .value("DIAMOND_SUIT", Suit::kDiamondSuit)
-      .value("SPADE_SUIT", Suit::kSpadeSuit)
+      .value("DIAMONDS_SUIT", Suit::kDiamondsSuit)
+      .value("HEARTS_SUIT", Suit::kHeartsSuit)
+      .value("SPADES_SUIT", Suit::kSpadesSuit)
       .export_values();
 
   m.attr("BLACK_JOKER") = kBlackJoker;
   m.attr("RED_JOKER") = kRedJoker;
   m.attr("ALL_SUITS") = kAllSuits;
   m.attr("NUM_RANKS") = kNumRanks;
-
-  m.def("test", &Test);
+  m.attr("NUM_CARDS") = kNumCards;
 
   py::class_<DoudizhuCard>(m, "DoudizhuCard")
       .def(py::init<>())
@@ -341,6 +336,107 @@ PYBIND11_MODULE(pydoudizhu, m) {
             };
           }
       ));
+
+  py::class_<DoudizhuDeck>(m, "DoudizhuDeck")
+      .def(py::init<>())
+      .def("size", &DoudizhuDeck::Size)
+      .def("empty", &DoudizhuDeck::Empty)
+      .def("deal_card", py::overload_cast<int, Suit>(&DoudizhuDeck::DealCard), py::arg("rank"), py::arg("suit"))
+      .def("deal_card", py::overload_cast<int>(&DoudizhuDeck::DealCard), py::arg("card_index"))
+      .def("card_in_deck",
+           py::overload_cast<const int, const Suit>(&DoudizhuDeck::CardInDeck, py::const_),
+           py::arg("rank"),
+           py::arg("suit"))
+      .def("card_in_deck",
+           py::overload_cast<const DoudizhuCard &>(&DoudizhuDeck::CardInDeck, py::const_),
+           py::arg("card"))
+      .def("__eq__", &DoudizhuDeck::operator==)
+      .def(py::pickle(
+          [](const DoudizhuDeck &deck) {
+            return py::make_tuple(deck.CardInDeck());
+          },
+          [](const py::tuple &t) {
+            CheckPyTupleSize(t, 1);
+            const auto cards_in_deck = t[0].cast<std::vector<bool>>();
+            DoudizhuDeck deck{};
+            for (int index = 0; index < kNumCards; ++index) {
+              if (!cards_in_deck[index]) {
+                deck.DealCard(index);
+              }
+            }
+            return deck;
+          }
+      ));
+
+  py::class_<DoudizhuHistoryItem>(m, "DoudizhuHistoryItem")
+      .def("__repr__", &DoudizhuHistoryItem::ToString)
+      .def_readonly("move", &DoudizhuHistoryItem::move)
+      .def_readonly("player", &DoudizhuHistoryItem::player)
+      .def_readonly("deal_to_player", &DoudizhuHistoryItem::deal_to_player)
+      .def_readonly("auction_type", &DoudizhuHistoryItem::auction_type)
+      .def_readonly("play_type", &DoudizhuHistoryItem::play_type)
+      .def_readonly("deal_card", &DoudizhuHistoryItem::deal_card)
+      .def_readonly("single_rank", &DoudizhuHistoryItem::single_rank)
+      .def_readonly("chain", &DoudizhuHistoryItem::chain)
+      .def_readonly("trio_comb", &DoudizhuHistoryItem::trio_comb)
+      .def_readonly("quad_comb", &DoudizhuHistoryItem::quad_comb)
+      .def_readonly("plane", &DoudizhuHistoryItem::plane)
+      .def_readonly("kickers", &DoudizhuHistoryItem::kickers)
+      .def("__eq__", &DoudizhuHistoryItem::operator==)
+      .def(py::pickle(
+          [](const DoudizhuHistoryItem &item) {
+            return py::make_tuple(item.move, item.player, item.deal_to_player);
+          },
+          [](const py::tuple &t) {
+            CheckPyTupleSize(t, 3);
+            const auto move = t[0].cast<DoudizhuMove>();
+            const auto player = t[1].cast<int>();
+            const auto deal_to_player = t[2].cast<int>();
+            DoudizhuHistoryItem item{move};
+            item.player = player;
+            item.deal_to_player = deal_to_player;
+            switch (move.MoveType()) {
+              case DoudizhuMove::kDeal:item.deal_card = move.DealCard();
+                break;
+              case DoudizhuMove::kAuction:item.auction_type = move.Auction();
+                break;
+              case DoudizhuMove::kPlay:item.play_type = move.GetPlayType();
+                item.single_rank = move.GetSingleRank();
+                item.chain = move.GetChain();
+                item.trio_comb = move.GetTrioComb();
+                item.quad_comb = move.GetQuadComb();
+                item.plane = move.GetPlane();
+                item.kickers = move.Kickers();
+                break;
+              default:FatalError("Should not reach here.");
+            }
+            return item;
+          }
+      ));
+
+  py::class_<DoudizhuGame>(m, "DoudizhuGame")
+      .def(py::init<GameParameters>(), py::arg("params"))
+      .def("all_moves", &DoudizhuGame::AllMoves)
+      .def("all_chance_outcomes", &DoudizhuGame::AllChanceOutcomes)
+      .def("max_moves", &DoudizhuGame::MaxMoves)
+      .def("max_score", &DoudizhuGame::MaxScore)
+      .def("min_score", &DoudizhuGame::MinScore)
+      .def("max_game_length", &DoudizhuGame::MaxGameLength)
+      .def("get_move", &DoudizhuGame::GetMove)
+      .def("get_chance_outcome", &DoudizhuGame::GetChanceOutcome)
+      .def("parameters", &DoudizhuGame::Parameters)
+      .def("__eq__", &DoudizhuGame::operator==)
+      .def(py::pickle(
+          [](const DoudizhuGame &game) {
+            return py::make_tuple(game.Parameters());
+          },
+          [](const py::tuple &t) {
+            const auto params = t[0].cast<GameParameters>();
+            return DoudizhuGame{params};
+          }
+      ));
+
+
 
 }
 }

@@ -16,13 +16,18 @@ class DoudizhuDeck {
   DoudizhuCard DealCard(int card_index);
   DoudizhuCard DealCard(std::mt19937 &rng);
 
-  int Size() const{return total_count_;}
-  bool Empty() const{return total_count_ == 0;}
-  bool CardInDeck(const int rank, const Suit suit) const{
+  int Size() const { return total_count_; }
+  bool Empty() const { return total_count_ == 0; }
+  bool CardInDeck(const int rank, const Suit suit) const {
     return card_in_deck_[CardIndex(rank, suit)];
   }
-  bool CardInDeck(const DoudizhuCard& card) const{
+  bool CardInDeck(const DoudizhuCard &card) const {
     return CardInDeck(card.CardRank(), card.CardSuit());
+  }
+  const std::vector<bool>& CardInDeck() const { return card_in_deck_; }
+
+  bool operator==(const DoudizhuDeck &other_deck) const {
+    return card_in_deck_ == other_deck.card_in_deck_;
   }
 
  private:

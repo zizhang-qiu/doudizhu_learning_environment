@@ -372,20 +372,6 @@ DoudizhuMove DoudizhuGame::ConstructMove(int uid) const {
   return {};
 
 }
-int DoudizhuGame::GetTrioWithSoloRank(int rank, int remainder) const {
-  int num = 0;
-  for (int i = 0; i < kNumRanks && num <= remainder; ++i) {
-    if (i != rank) ++num;
-  }
-  return num;
-}
-int DoudizhuGame::GetTrioWithPairRank(int rank, int remainder) const {
-  int num = 0;
-  for (int i = 0; i < kNumCardsPerSuit && num < remainder; ++i) {
-    if (i != rank) ++num;
-  }
-  return num;
-}
 std::pair<int, int> DoudizhuGame::GetChainOfSoloLengthAndStartRank(int uid) const {
   int sum = 0;
   for (int i = 8; i >= 1; --i) {
