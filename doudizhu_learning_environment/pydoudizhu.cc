@@ -414,7 +414,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
           }
       ));
 
-  py::class_<DoudizhuGame>(m, "DoudizhuGame")
+  py::class_<DoudizhuGame, std::shared_ptr<DoudizhuGame>>(m, "DoudizhuGame")
       .def(py::init<GameParameters>(), py::arg("params"))
       .def("all_moves", &DoudizhuGame::AllMoves)
       .def("all_chance_outcomes", &DoudizhuGame::AllChanceOutcomes)
@@ -436,7 +436,51 @@ PYBIND11_MODULE(pydoudizhu, m) {
           }
       ));
 
+  py::enum_<Phase>(m, "Phase")
+      .value("DEAL", Phase::kDeal)
+      .value("AUCTION", Phase::kAuction)
+      .value("PLAY", Phase::kPlay)
+      .value("GAME_OVER", Phase::kGameOver)
+      .export_values();
 
+  py::class_<DoudizhuState>(m, "DoudizhuState")
+      .def(py::init<const std::shared_ptr<DoudizhuGame> &>(), py::arg("parent_game"))
+      .def("is_terminal", &DoudizhuState::IsTerminal)
+      .def("current_player", &DoudizhuState::CurrentPlayer)
+      .def("current_phase", &DoudizhuState::CurrentPhase)
+      .def("__repr__", &DoudizhuState::ToString)
+      .def("move_is_legal", &DoudizhuState::MoveIsLegal)
+      .def("apply_move", &DoudizhuState::ApplyMove)
+      .def("legal_moves", py::overload_cast<int>(&DoudizhuState::LegalMoves, py::const_))
+      .def("legal_moves", py::overload_cast<>(&DoudizhuState::LegalMoves, py::const_))
+      .def("chance_outcomes", &DoudizhuState::ChanceOutcomes)
+      .def("apply_random_chance", &DoudizhuState::ApplyRandomChance)
+      .def("hands", &DoudizhuState::Hands)
+      .def("deck", &DoudizhuState::Deck)
+      .def("parent_game", &DoudizhuState::ParentGame)
+      .def("move_history", &DoudizhuState::MoveHistory)
+      .def("played_cards_per_rank", &DoudizhuState::PlayedCardsPerRank)
+      .def("dizhu", &DoudizhuState::Dizhu)
+      .def("winning_bid", &DoudizhuState::WinningBid)
+      .def("num_bombs_played", &DoudizhuState::NumBombsPlayed)
+      .def("cards_left_over", &DoudizhuState::CardsLeftOver)
+      .def("returns", &DoudizhuState::Returns)
+      .def("__eq__", &DoudizhuState::operator==)
+      .def(py::pickle(
+          [](const DoudizhuState &state) {
+            return py::make_tuple(state.ParentGame(), state.MoveHistory());
+          },
+          [](const py::tuple &t) {
+            CheckPyTupleSize(t, 2);
+            const auto game = t[0].cast<std::shared_ptr<DoudizhuGame>>();
+            const auto move_history = t[1].cast<std::vector<DoudizhuHistoryItem>>();
+            DoudizhuState state{game};
+            for (const auto &item : move_history) {
+              state.ApplyMove(item.move);
+            }
+            return state;
+          }
+      ));
 
 }
 }

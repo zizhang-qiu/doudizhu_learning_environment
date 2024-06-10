@@ -7,6 +7,7 @@
 """
 import os
 import pickle
+import random
 import sys
 import unittest
 
@@ -266,8 +267,44 @@ class SmokeTest(unittest.TestCase):
 
         os.remove("temp_game")
 
+    def test_doudizhu_state(self):
+        params = {}
+        game = pydoudizhu.DoudizhuGame(params)
+        state = pydoudizhu.DoudizhuState(parent_game=game)
+        self.assertEqual(state.parent_game(), game)
+        self.assertEqual(state.current_phase(), pydoudizhu.Phase.DEAL)
 
+        self.assertFalse(state.is_terminal())
 
+        while state.current_phase() == pydoudizhu.Phase.DEAL:
+            state.apply_random_chance()
+
+        self.assertEqual(state.current_phase(), pydoudizhu.Phase.AUCTION)
+
+        while state.current_phase() == pydoudizhu.Phase.AUCTION:
+            legal_moves = state.legal_moves()
+            random_move = random.choice(legal_moves)
+            state.apply_move(random_move)
+
+        self.assertEqual(state.current_phase(), pydoudizhu.Phase.PLAY)
+
+        while state.current_phase() == pydoudizhu.Phase.PLAY:
+            legal_moves = state.legal_moves()
+            random_move = random.choice(legal_moves)
+            state.apply_move(random_move)
+
+        self.assertEqual(state.current_phase(), pydoudizhu.Phase.GAME_OVER)
+        self.assertTrue(state.is_terminal())
+
+        with open("temp_state", "wb") as fp:
+            pickle.dump(state, fp)
+
+        with open("temp_state", "rb") as fp:
+            loaded_state = pickle.load(fp)
+
+        self.assertEqual(state, loaded_state)
+
+        os.remove("temp_state")
 
 
 if __name__ == '__main__':
