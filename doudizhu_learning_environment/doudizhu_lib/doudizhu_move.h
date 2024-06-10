@@ -47,7 +47,7 @@ enum KickerType { kUnknown = -1, kSolo = 1, kPair };
 struct TrioComb {
   KickerType kicker_type{kUnknown};
   int trio_rank{};
-  TrioComb(KickerType kt, int r) : kicker_type(kt), trio_rank(r) {}
+  TrioComb(KickerType kt, int tr) : kicker_type(kt), trio_rank(tr) {}
   TrioComb() = default;
   bool operator==(const TrioComb &other) const {
     return kicker_type == other.kicker_type
@@ -147,12 +147,12 @@ class DoudizhuMove {
   DoudizhuMove() = default;
 
   // Fast constructor for a deal move.
-  DoudizhuMove(const DoudizhuCard &deal_card) :
+  explicit DoudizhuMove(const DoudizhuCard &deal_card) :
       move_type_(kDeal),
       deal_card_(deal_card) {}
 
   // Fast constructor for an auction move.
-  DoudizhuMove(AuctionType auction_type) :
+  explicit DoudizhuMove(AuctionType auction_type) :
       move_type_(kAuction),
       auction_type_(auction_type) {}
 
@@ -172,6 +172,90 @@ class DoudizhuMove {
         quad_comb_(quad_comb),
         plane_(plane),
         kickers_(kickers) {}
+
+  // Fast constructor for single ranks.
+  explicit DoudizhuMove(SingleRank single_rank)
+      : move_type_(kPlay),
+        single_rank_(single_rank) {
+    switch (single_rank_.num_cards) {
+      case 1:play_type_ = PlayType::kSolo;
+        break;
+      case 2:play_type_ = PlayType::kPair;
+        break;
+      case 3:play_type_ = PlayType::kTrio;
+        break;
+      case 4:play_type_ = PlayType::kBomb;
+        break;
+      default:FatalError("Should not reach here.");
+    }
+  }
+
+  // Fast constructor for chains.
+  explicit DoudizhuMove(Chain chain)
+      : move_type_(kPlay),
+        chain_(chain) {
+    switch (chain_.chain_type) {
+      case ChainType::kSolo:play_type_ = PlayType::kChainOfSolo;
+        break;
+      case ChainType::kPair:play_type_ = PlayType::kChainOfPair;
+        break;
+      case ChainType::kTrio:play_type_ = PlayType::kChainOfTrio;
+        break;
+      default:FatalError("Should not reach here.");
+    }
+  }
+
+  // Fast constructor for trio combs.
+  DoudizhuMove(TrioComb trio_comb,
+               const std::vector<int> &kickers)
+      : move_type_(kPlay),
+        trio_comb_(trio_comb),
+        kickers_(kickers) {
+    switch (trio_comb_.kicker_type) {
+      case kSolo:play_type_ = PlayType::kTrioWithSolo;
+        break;
+      case kPair:play_type_ = PlayType::kTrioWithPair;
+        break;
+      default:FatalError("Should not reach here.");
+    }
+  }
+
+  // Fast constructor for quad combs.
+  DoudizhuMove(QuadComb quad_comb,
+               const std::vector<int> &kickers)
+      : move_type_(kPlay),
+        quad_comb_(quad_comb),
+        kickers_(kickers) {
+    switch (quad_comb_.kicker_type) {
+      case kSolo:play_type_ = PlayType::kQuadWithSolo;
+        break;
+      case kPair:play_type_ = PlayType::kQuadWithPair;
+        break;
+      default:FatalError("Should not reach here.");
+    }
+  }
+
+  // Fast constructor for planes.
+  DoudizhuMove(Plane plane,
+               const std::vector<int> &kickers)
+      : move_type_(kPlay),
+        plane_(plane),
+        kickers_(kickers) {
+    switch (plane_.kicker_type) {
+      case kSolo:play_type_ = PlayType::kPlaneWithSolo;
+        break;
+      case kPair:play_type_ = PlayType::kPlaneWithPair;
+        break;
+      default:FatalError("Should not reach here.");
+    }
+  }
+
+  // Fast constructor for rockets.
+  explicit DoudizhuMove(PlayType play_type)
+      : move_type_(kPlay) {
+    CHECK_EQ(static_cast<int>(play_type), static_cast<int>(PlayType::kRocket));
+    play_type_ = play_type;
+  }
 
   DoudizhuMove(const DoudizhuMove &) = default;
 
@@ -229,6 +313,6 @@ class DoudizhuMove {
   std::vector<int> kickers_{};
 };
 
-bool HandCanMakeMove(const DoudizhuHand& hand, const DoudizhuMove& move);
+bool HandCanMakeMove(const DoudizhuHand &hand, const DoudizhuMove &move);
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_MOVE_H_

@@ -62,7 +62,7 @@ void MoveTest() {
   // Deal
   for (const Suit suit : kAllSuits) {
     for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
-      const DoudizhuMove move({rank, suit});
+      const DoudizhuMove move(DoudizhuCard{rank, suit});
       std::string expected = "(Deal ";
       expected.push_back(kSuitChar[suit]);
       expected.push_back(kRankChar[rank]);
@@ -73,9 +73,9 @@ void MoveTest() {
   }
 
   {
-    DoudizhuMove deal_red_joker({kRedJoker, kInvalidSuit});
+    DoudizhuMove deal_red_joker(DoudizhuCard{kRedJoker, kInvalidSuit});
     CHECK_EQ(deal_red_joker.ToString(), "(Deal RJ)");
-    DoudizhuMove deal_black_joker({kBlackJoker, kInvalidSuit});
+    DoudizhuMove deal_black_joker(DoudizhuCard{kBlackJoker, kInvalidSuit});
     CHECK_EQ(deal_black_joker.ToString(), "(Deal BJ)");
   }
 

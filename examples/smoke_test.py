@@ -48,7 +48,7 @@ class SmokeTest(unittest.TestCase):
         self.assertEqual(card.card_rank(), 0)
         self.assertEqual(card.card_suit(), pydoudizhu.Suit.CLUBS_SUIT)
 
-        # pickle.
+        # Pickle.
         with open("temp_card", "wb") as fp:
             pickle.dump(card, fp)
 
@@ -85,16 +85,149 @@ class SmokeTest(unittest.TestCase):
         hand.remove_from_hand(0)
         self.assertEqual(hand.size(), 2)
 
-        # pickle
+        # Pickle
         with open("temp_hand", "wb") as fp:
             pickle.dump(hand, fp)
 
         with open("temp_hand", "rb") as fp:
             loaded_hand = pickle.load(fp)
 
-        self.assertEqual(hand, hand)
+        self.assertEqual(hand, loaded_hand)
 
         os.remove("temp_hand")
+
+    def test_doudizhu_move(self):
+        invalid_move = pydoudizhu.DoudizhuMove()
+        self.assertFalse(invalid_move.is_valid())
+
+        # Solo
+        solo_move = pydoudizhu.DoudizhuMove(
+            play_type=pydoudizhu.PlayType.SOLO,
+            single_rank=pydoudizhu.SingleRank(r=0, n=1),
+            chain=pydoudizhu.Chain(),
+            trio_comb=pydoudizhu.TrioComb(),
+            quad_comb=pydoudizhu.QuadComb(),
+            plane=pydoudizhu.Plane(),
+            kickers=[]
+        )
+        self.assertEqual(repr(solo_move), "(Play 3)")
+
+        # Pair
+        pair_move = pydoudizhu.DoudizhuMove(pydoudizhu.SingleRank(r=1, n=2))
+        self.assertEqual(repr(pair_move), "(Play 44)")
+        self.assertEqual(pair_move.get_play_type(), pydoudizhu.PlayType.PAIR)
+
+        # Trio
+        trio_move = pydoudizhu.DoudizhuMove(pydoudizhu.SingleRank(r=2, n=3))
+        self.assertEqual(repr(trio_move), "(Play 555)")
+        self.assertEqual(trio_move.get_play_type(), pydoudizhu.PlayType.TRIO)
+
+        # Bomb
+        bomb_move = pydoudizhu.DoudizhuMove(pydoudizhu.SingleRank(r=3, n=4))
+        self.assertEqual(repr(bomb_move), "(Play 6666)")
+        self.assertTrue(bomb_move.is_bomb())
+        self.assertEqual(bomb_move.bomb_rank(), 3)
+        self.assertEqual(bomb_move.get_play_type(), pydoudizhu.PlayType.BOMB)
+
+        # Chain of solo
+        chain_of_solo_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.Chain(chain_type=pydoudizhu.ChainType.SOLO, length=5, start_rank=0))
+        self.assertEqual(repr(chain_of_solo_move), "(Play 34567)")
+        self.assertEqual(chain_of_solo_move.get_play_type(), pydoudizhu.PlayType.CHAIN_OF_SOLO)
+
+        # Chain of pair
+        chain_of_pair_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.Chain(chain_type=pydoudizhu.ChainType.PAIR, length=3, start_rank=0))
+        self.assertEqual(repr(chain_of_pair_move), "(Play 334455)")
+        self.assertEqual(chain_of_pair_move.get_play_type(), pydoudizhu.PlayType.CHAIN_OF_PAIR)
+
+        # Chain of trio
+        chain_of_trio_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.Chain(chain_type=pydoudizhu.ChainType.TRIO, length=3, start_rank=1))
+        self.assertEqual(repr(chain_of_trio_move), "(Play 444555666)")
+        self.assertEqual(chain_of_trio_move.get_play_type(), pydoudizhu.PlayType.CHAIN_OF_TRIO)
+
+        # Trio with solo
+        trio_with_solo_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.TrioComb(kt=pydoudizhu.KickerType.SOLO, tr=4),
+            [0]
+        )
+        self.assertEqual(repr(trio_with_solo_move), "(Play 7773)")
+        self.assertEqual(trio_with_solo_move.get_play_type(), pydoudizhu.PlayType.TRIO_WITH_SOLO)
+
+        # Trio with pair
+        trio_with_pair_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.TrioComb(kt=pydoudizhu.KickerType.PAIR, tr=5),
+            [1, 1]
+        )
+        self.assertEqual(repr(trio_with_pair_move), "(Play 88844)")
+        self.assertEqual(trio_with_pair_move.get_play_type(), pydoudizhu.PlayType.TRIO_WITH_PAIR)
+
+        # Quad with solo
+        quad_with_solo_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.QuadComb(kt=pydoudizhu.KickerType.SOLO, qr=2),
+            [0, 1]
+        )
+        self.assertEqual(repr(quad_with_solo_move), "(Play 555534)")
+        self.assertEqual(quad_with_solo_move.get_play_type(), pydoudizhu.PlayType.QUAD_WITH_SOLO)
+
+        # Quad with pair
+        quad_with_pair_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.QuadComb(kt=pydoudizhu.KickerType.PAIR, qr=11),
+            [9, 9, 10, 10]
+        )
+        self.assertEqual(repr(quad_with_pair_move), "(Play AAAAQQKK)")
+        self.assertEqual(quad_with_pair_move.get_play_type(), pydoudizhu.PlayType.QUAD_WITH_PAIR)
+
+        # Plane with solo
+        plane_with_solo_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.Plane(kt=pydoudizhu.KickerType.SOLO, l=2, sr=0),
+            kickers=[2, 3]
+        )
+        self.assertEqual(repr(plane_with_solo_move), "(Play 33344456)")
+        self.assertEqual(plane_with_solo_move.get_play_type(), pydoudizhu.PlayType.PLANE_WITH_SOLO)
+
+        # Plane with solo
+        plane_with_pair_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.Plane(kt=pydoudizhu.KickerType.PAIR, l=3, sr=0),
+            kickers=[4, 4, 5, 5, 6, 6]
+        )
+        self.assertEqual(repr(plane_with_pair_move), "(Play 333444555778899)")
+        self.assertEqual(plane_with_pair_move.get_play_type(), pydoudizhu.PlayType.PLANE_WITH_PAIR)
+
+        # Rocket
+        rocket_move = pydoudizhu.DoudizhuMove(
+            pydoudizhu.PlayType.ROCKET
+        )
+        self.assertTrue(rocket_move.is_bomb())
+        self.assertEqual(repr(rocket_move), "(Play BR)")
+        self.assertEqual(rocket_move.bomb_rank(), 13)
+
+        # Pickle
+        for move in [
+            solo_move,
+            pair_move,
+            trio_move,
+            bomb_move,
+            chain_of_solo_move,
+            chain_of_pair_move,
+            chain_of_trio_move,
+            trio_with_solo_move,
+            trio_with_pair_move,
+            quad_with_solo_move,
+            quad_with_pair_move,
+            plane_with_solo_move,
+            plane_with_pair_move,
+            rocket_move]:
+            with open("temp_move", "wb") as fp:
+                pickle.dump(move, fp)
+
+            with open("temp_move", "rb") as fp:
+                loaded_move = pickle.load(fp)
+
+            self.assertEqual(move, loaded_move)
+
+            os.remove("temp_move")
 
 
 if __name__ == '__main__':

@@ -159,8 +159,9 @@ bool DoudizhuMove::operator==(const DoudizhuMove &other_move) const {
               && kickers_ == other_move.kickers_);
         case PlayType::kQuadWithSolo:
         case PlayType::kQuadWithPair:return (quad_comb_ == other_move.quad_comb_ && kickers_ == other_move.kickers_);
+        case PlayType::kRocket:return true;
 
-        default:FatalError("Should not reach here.");
+        default:FatalError("Should not reach here, move_type=" + std::to_string(move_type_));
       }
     }
   }

@@ -150,7 +150,7 @@ DoudizhuMove DoudizhuGame::ConstructChanceOutcome(int uid) const {
   }
 //  std::cout << "uid: " << uid << ", rank: " << Uid2Rank(uid) << ", suit: " << Uid2Suit(uid) << std::endl;
   const DoudizhuCard deal_card{/*rank=*/Uid2Rank(uid), /*suit*/Uid2Suit(uid)};
-  return {/*deal_card=*/deal_card};
+  return DoudizhuMove{/*deal_card=*/deal_card};
 }
 DoudizhuMove DoudizhuGame::ConstructMove(int uid) const {
   if (uid < 0 || uid >= MaxMoves()) {
@@ -170,7 +170,7 @@ DoudizhuMove DoudizhuGame::ConstructMove(int uid) const {
   }
   if (uid < MaxAuctionMoves()) {
     // 0-pass, 1-bid 1, 2-bid 2, 3-bid3.
-    return {/*auction_type=*/DoudizhuMove::AuctionType(uid)};
+    return DoudizhuMove{/*auction_type=*/DoudizhuMove::AuctionType(uid)};
   }
   uid -= MaxAuctionMoves();
   // Play move.
