@@ -219,6 +219,7 @@ class SmokeTest(unittest.TestCase):
             plane_with_solo_move,
             plane_with_pair_move,
             rocket_move]:
+
             with open("temp_move", "wb") as fp:
                 pickle.dump(move, fp)
 
