@@ -48,10 +48,6 @@ void CardTest() {
   std::cout << "Passed card test." << std::endl;
 }
 
-void HandTest() {
-
-}
-
 void MoveTest() {
   // Invalid.
   {
@@ -501,6 +497,21 @@ void GameTest() {
   } else {
     std::cerr << "Failed to open file" << std::endl;
   }
+
+  // Test if GetChanceOutcome() is consistent with GetChanceOutcomeUid()
+  const auto& all_chance_outcomes = game.AllChanceOutcomes();
+  for (int i = 0; i < all_chance_outcomes.size(); ++i) {
+    const int uid = game.GetChanceOutcomeUid(all_chance_outcomes[i]);
+    CHECK_EQ(uid, i);
+  }
+
+  // Test if GetMove() is consistent with GetMoveUid()
+  for (int i = 0; i < all_moves.size(); ++i) {
+    const int uid = game.GetMoveUid(all_moves[i]);
+    CHECK_EQ(uid, i);
+  }
+
+  std::cout << "Passed game test." << std::endl;
 }
 
 void RandomSimTest(bool verbose, int seed) {
@@ -548,12 +559,14 @@ void RandomSimTest(bool verbose, int seed) {
   if (verbose) {
     std::cout << "Game done, terminal state:\n" << state.ToString() << "\n\n";
   }
+
+  std::cout << "Passed random sim test." << std::endl;
 }
 
 int main() {
-//  CardTest();
-//  MoveTest();
-//  GameTest();
-  RandomSimTest(true, 42);
+  CardTest();
+  MoveTest();
+  GameTest();
+  RandomSimTest(false, 42);
   return 0;
 }

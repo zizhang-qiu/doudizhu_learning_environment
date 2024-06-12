@@ -4,6 +4,9 @@
 
 #include <iostream>
 #include <utility>
+#include <algorithm>
+#include <numeric>
+
 #include "doudizhu_game.h"
 namespace doudizhu_learning_env {
 DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
@@ -14,7 +17,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
 
   // Possible trio with solos.
   for (int trio_rank = 0; trio_rank < kNumCardsPerSuit; ++trio_rank) {
-    const TrioComb trio_comb{/*kt=*/kSolo, /*r=*/trio_rank};
+    const TrioComb trio_comb{/*kt=*/kSolo, /*tr=*/trio_rank};
     const auto kickers = GetPossibleKickers(trio_comb);
     for (const auto &ks : kickers) {
       const DoudizhuMove move{
@@ -32,7 +35,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
 
   // Possible trio with pairs.
   for (int trio_rank = 0; trio_rank < kNumCardsPerSuit; ++trio_rank) {
-    const TrioComb trio_comb{/*kt=*/kPair, /*r=*/trio_rank};
+    const TrioComb trio_comb{/*kt=*/kPair, /*tr=*/trio_rank};
     const auto kickers = GetPossibleKickers(trio_comb);
     for (const auto &ks : kickers) {
       const DoudizhuMove move{
@@ -413,6 +416,165 @@ DoudizhuMove DoudizhuGame::PickRandomChance(const std::pair<std::vector<Doudizhu
   std::discrete_distribution<std::mt19937::result_type> dist(
       chance_outcomes.second.begin(), chance_outcomes.second.end());
   return chance_outcomes.first[dist(rng_)];
+}
+int DoudizhuGame::GetChanceOutcomeUid(const DoudizhuMove &chance) const {
+  if (chance.MoveType() != DoudizhuMove::kDeal) {
+    return -1;
+  }
+  const auto deal_card = chance.DealCard();
+  return CardIndex(deal_card);
+}
+int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
+  switch (move.MoveType()) {
+    case DoudizhuMove::kAuction: {
+      return static_cast<int>(move.Auction());
+    }
+    case DoudizhuMove::kPlay: {
+      int uid_base = kNumBids + 1;
+      const auto play_type = move.GetPlayType();
+      if (play_type == DoudizhuMove::PlayType::kSolo) {
+        return uid_base + move.GetSingleRank().rank;
+      }
+      uid_base += kNumSolos;
+      if (play_type == DoudizhuMove::PlayType::kPair) {
+        return uid_base + move.GetSingleRank().rank;
+      }
+      uid_base += kNumPairs;
+      if (play_type == DoudizhuMove::PlayType::kTrio) {
+        return uid_base + move.GetSingleRank().rank;
+      }
+      uid_base += kNumTrios;
+      if (play_type == DoudizhuMove::PlayType::kTrioWithSolo) {
+        // TODO: Find a better way instead of std::find.
+        return uid_base
+            + static_cast<int>((std::find(trio_with_solos_.begin(), trio_with_solos_.end(), move)
+                - trio_with_solos_.begin()));
+      }
+      uid_base += kNumTrioWithSolos;
+      if (play_type == DoudizhuMove::PlayType::kTrioWithPair) {
+        return uid_base +
+            +static_cast<int>((std::find(trio_with_pairs_.begin(), trio_with_pairs_.end(), move)
+                - trio_with_pairs_.begin()));
+      }
+      uid_base += kNumTrioWithPairs;
+      if (play_type == DoudizhuMove::PlayType::kChainOfSolo) {
+        const std::vector<int> lengths =
+            Range(NumberOfChainOrPlane(kChainOfSoloMinLength), NumberOfChainOrPlane(kChainOfSoloMaxLength), -1);
+        const int uid = uid_base + std::accumulate(lengths.begin(),
+                                                   lengths.begin() + move.GetChain().length - kChainOfSoloMinLength,
+                                                   0)
+            + move.GetChain().start_rank;
+        return uid;
+      }
+      uid_base += kNumChainOfSolos;
+      if (play_type == DoudizhuMove::PlayType::kChainOfPair) {
+        const std::vector<int> lengths =
+            Range(NumberOfChainOrPlane(kChainOfPairMinLength), NumberOfChainOrPlane(kChainOfPairMaxLength), -1);
+        const int uid = uid_base + std::accumulate(lengths.begin(),
+                                                   lengths.begin() + move.GetChain().length - kChainOfPairMinLength,
+                                                   0)
+            + move.GetChain().start_rank;
+        return uid;
+      }
+      uid_base += kNumChainOfPairs;
+      if (play_type == DoudizhuMove::PlayType::kChainOfTrio) {
+        const std::vector<int> lengths =
+            Range(NumberOfChainOrPlane(kChainOfTrioMinLength), NumberOfChainOrPlane(kChainOfTrioMaxLength), -1);
+        const int uid = uid_base + std::accumulate(lengths.begin(),
+                                                   lengths.begin() + move.GetChain().length - kChainOfTrioMinLength,
+                                                   0)
+            + move.GetChain().start_rank;
+        return uid;
+      }
+      uid_base += kNumChainOfTrios;
+      if (play_type == DoudizhuMove::PlayType::kPlaneWithSolo) {
+        const Plane plane = move.GetPlane();
+        const auto get_index = [&](const int length) {
+          return static_cast<int>(
+              std::find(plane_with_solo_per_length_.at(length).begin(),
+                        plane_with_solo_per_length_.at(length).end(),
+                        move)
+                  - plane_with_solo_per_length_.at(length).begin());
+        };
+        CHECK_GE(plane.length, kPlaneWithSoloMinLength);
+        CHECK_LE(plane.length, kPlaneWithSoloMaxLength);
+        if (plane.length == 2) {
+          return uid_base + get_index(2);
+        }
+        uid_base += kNumLength2PlaneWithSolos;
+        if (plane.length == 3) {
+          return uid_base + get_index(3);
+        }
+        uid_base += kNumLength3PlaneWithSolos;
+        if (plane.length == 4) {
+          return uid_base + get_index(4);
+        }
+        uid_base += kNumLength4PlaneWithSolos;
+        if (plane.length == 5) {
+          return uid_base + get_index(5);
+        }
+        FatalError("Should not reach here.");
+      }
+      uid_base += kNumPlaneWithSolos;
+
+      if (play_type == DoudizhuMove::PlayType::kPlaneWithPair) {
+        const Plane plane = move.GetPlane();
+        const auto get_index = [&](const int length) {
+          return static_cast<int>(
+              std::find(plane_with_pair_per_length_.at(length).begin(),
+                        plane_with_pair_per_length_.at(length).end(),
+                        move)
+                  - plane_with_pair_per_length_.at(length).begin());
+        };
+        CHECK_GE(plane.length, kPlaneWithPairMinLength);
+        CHECK_LE(plane.length, kPlaneWithPairMaxLength);
+        if (plane.length == 2) {
+          return uid_base + get_index(2);
+        }
+        uid_base += kNumLength2PlaneWithPairs;
+        if (plane.length == 3) {
+          return uid_base + get_index(3);
+        }
+        uid_base += kNumLength3PlaneWithPairs;
+        if (plane.length == 4) {
+          return uid_base + get_index(4);
+        }
+        FatalError("Should not reach here.");
+      }
+      uid_base += kNumPlaneWithPairs;
+
+      if (play_type == DoudizhuMove::PlayType::kQuadWithSolo) {
+        return uid_base +
+            static_cast<int>(std::find(quad_with_solos_.begin(), quad_with_solos_.end(), move)
+                - quad_with_solos_.begin());
+      }
+      uid_base += kNumQuadWithSolos;
+
+      if (play_type == DoudizhuMove::PlayType::kQuadWithPair) {
+        return uid_base +
+            static_cast<int>(std::find(quad_with_pairs_.begin(), quad_with_pairs_.end(), move)
+                - quad_with_pairs_.begin());
+      }
+      uid_base += kNumQuadWithPairs;
+
+      if (play_type == DoudizhuMove::PlayType::kBomb) {
+        return uid_base + move.GetSingleRank().rank;
+      }
+      uid_base += kNumBombs;
+
+      if (play_type == DoudizhuMove::PlayType::kRocket) {
+        return uid_base;
+      }
+      uid_base += kNumRockets;
+
+      if (play_type == DoudizhuMove::PlayType::kPass) {
+        return uid_base;
+      }
+
+      FatalError("Should not reach here, the move is " + move.ToString());
+    }
+    default:return -1;
+  }
 }
 
 }

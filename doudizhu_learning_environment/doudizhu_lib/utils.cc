@@ -82,8 +82,27 @@ void CombineHelper(const std::vector<int> &nums,
     if (i > start && nums[i] == nums[i - 1]) continue;
     current.push_back(nums[i]);
     CombineHelper(nums, k, i + 1, current, result);
-    current.pop_back(); // 回溯
+    current.pop_back();
   }
+}
+std::vector<int> Range(int start, int stop, int step) {
+  std::vector<int> result{};
+
+  if (step == 0) {
+    FatalError("The step is zero!");
+  }
+
+  if (step > 0) {
+    for (int i = start; i < stop; i += step) {
+      result.push_back(i);
+    }
+  } else {
+    for (int i = start; i > stop; i += step) {
+      result.push_back(i);
+    }
+  }
+
+  return result;
 }
 
 }  // namespace doudizhu_learning_env

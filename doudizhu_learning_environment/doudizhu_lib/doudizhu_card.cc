@@ -30,29 +30,30 @@ bool DoudizhuCard::operator==(const DoudizhuCard &other_card) const {
 }
 
 int Uid2Rank(int card_uid) {
-  if (card_uid >= 52) {
-    return card_uid - 52 + kBlackJoker;
+  if (card_uid >= kNumNormalCards) {
+    return card_uid - kNumNormalCards + kBlackJoker;
   }
   return card_uid / kNumSuits;
 }
 Suit Uid2Suit(int card_uid) {
-  if (card_uid >= 52) {
+  if (card_uid >= kNumNormalCards) {
     return kInvalidSuit;
   }
   return Suit(card_uid % kNumSuits);
 }
 
 int CardIndex(int rank, Suit suit) {
-  if(rank == kBlackJoker){
+  if (rank == kBlackJoker) {
     return kNumCards - 2;
   }
-  if(rank == kRedJoker){
+  if (rank == kRedJoker) {
     return kNumCards - 1;
   }
   return rank * kNumSuits + suit;
 }
 
 int CardIndex(const DoudizhuCard &card) {
+  if (!card.IsValid()) { return -1; }
   return CardIndex(card.CardRank(), card.CardSuit());
 }
 

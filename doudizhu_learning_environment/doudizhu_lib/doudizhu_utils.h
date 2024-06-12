@@ -6,6 +6,7 @@
 #define DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_
 #include "utils.h"
 namespace doudizhu_learning_env {
+
 inline constexpr int kInvalidPlayer = -1;
 inline constexpr int kLeftOverPlayer = -2;
 inline constexpr int kChancePlayerId = -3;
@@ -34,10 +35,17 @@ inline constexpr int kMinUtility = -kNumBids * 8192;
 inline constexpr int kNumRanks = kNumCardsPerSuit + 2;
 
 inline constexpr int kNumCardsLeftOver = 3;
+inline constexpr int kChainAndPlaneMaxRank = 11; // Ace.
+
+constexpr int NumberOfChainOrPlane(int length) {
+  return kChainAndPlaneMaxRank - length + 1 - 0 + 1;
+}
 
 inline constexpr int kNumSuits = 4;
+inline constexpr int kNumNormalCards = kNumCardsPerSuit * kNumSuits;
 
 inline constexpr int kNumFarmerCards = (kNumCards - 3) / 3;
+inline constexpr int kNumDizhuCards = kNumFarmerCards + kNumCardsLeftOver;
 
 inline constexpr int kChainOfSoloMinLength = 5; // 34567
 inline constexpr int kChainOfSoloMaxLength = 12; // 3456789TJQKA
@@ -56,11 +64,36 @@ inline constexpr int kNumPairs = kNumCardsPerSuit;
 inline constexpr int kNumTrios = kNumCardsPerSuit;
 inline constexpr int kNumTrioWithSolos = kNumCardsPerSuit * (kNumRanks - 1);
 inline constexpr int kNumTrioWithPairs = kNumCardsPerSuit * (kNumCardsPerSuit - 1);
-inline constexpr int kNumChainOfSolos = (1 + 8) * 8 / 2;
-inline constexpr int kNumChainOfPairs = (3 + 10) * 8 / 2; // 33~qq is the maximum length.
-inline constexpr int kNumChainOfTrios = (7 + 11) * 5 / 2; // 333~888 is the maximum length.
+
+constexpr int GetNumChainOfSolos() {
+  int num = 0;
+  for (int l = kChainOfSoloMinLength; l <= kChainOfSoloMaxLength; ++l) {
+    num += NumberOfChainOrPlane(l);
+  }
+  return num;
+}
+
+constexpr int GetNumChainOfPairs() {
+  int num = 0;
+  for (int l = kChainOfPairMinLength; l <= kChainOfPairMaxLength; ++l) {
+    num += NumberOfChainOrPlane(l);
+  }
+  return num;
+}
+
+constexpr int GetNumChainOfTrios() {
+  int num = 0;
+  for (int l = kChainOfTrioMinLength; l <= kChainOfTrioMaxLength; ++l) {
+    num += NumberOfChainOrPlane(l);
+  }
+  return num;
+}
+
+inline constexpr int kNumChainOfSolos = GetNumChainOfSolos();
+inline constexpr int kNumChainOfPairs = GetNumChainOfPairs(); // 33~qq is the maximum length.
+inline constexpr int kNumChainOfTrios = GetNumChainOfTrios(); // 333~888 is the maximum length.
 inline constexpr int kNumLength2PlaneWithSolos = 11 * (kNumCardsPerSuit - 2 // 2 same cards.
-    + Combination(kNumRanks - 2, 2) - 1); // 2 different cards.
+    + Combination(kNumRanks - 2, 2) - 1); // 2 different cards except Rocket.
 inline constexpr int kNumLength3PlaneWithSolos = 10 * (kNumCardsPerSuit - 3 // 3 same cards.
     + ((kNumCardsPerSuit - 3) * Combination(kNumRanks - 4, 1)) // 2 same cards and a different card.
     + Combination(kNumRanks - 3, 3) - (kNumCardsPerSuit - 3)) // 3 different cards.
@@ -126,8 +159,6 @@ inline constexpr int kNumDistinctMoves =
 
 constexpr char kSuitChar[] = "CDHS";
 constexpr char kRankChar[] = "3456789TJQKA2BR";
-
-constexpr char kAllCardRankChar[] = "3333444455556666777788889999TTTTJJJJQQQQKKKKAAAA2222BR";
 
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_

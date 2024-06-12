@@ -32,6 +32,8 @@ constexpr int Combination(int n, int r) {
   return res;
 }
 
+std::vector<int> Range(int start, int stop, int step = 1);
+
 void CombineHelper(const std::vector<int> &nums,
                    int k,
                    int start,

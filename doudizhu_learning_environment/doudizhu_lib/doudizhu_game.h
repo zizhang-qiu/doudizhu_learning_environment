@@ -49,6 +49,10 @@ class DoudizhuGame {
 
   DoudizhuMove GetChanceOutcome(int uid) const { return chance_outcomes_[uid]; }
 
+  int GetMoveUid(const DoudizhuMove& move) const;
+
+  int GetChanceOutcomeUid(const DoudizhuMove& chance) const;
+
   DoudizhuMove PickRandomChance(const std::pair<std::vector<DoudizhuMove>,
                                                 std::vector<double>> &chance_outcomes) const;
 
@@ -89,5 +93,8 @@ class DoudizhuGame {
   std::pair<int, int> GetChainOfPairLengthAndStartRank(int uid) const;
   std::pair<int, int> GetChainOfTrioLengthAndStartRank(int uid) const;
 };
+
+const GameParameters default_params = {};
+const auto default_game = std::make_shared<DoudizhuGame>(default_params);
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_GAME_H_
