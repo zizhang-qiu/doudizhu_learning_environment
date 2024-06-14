@@ -41,6 +41,18 @@ constexpr int NumberOfChainOrPlane(int length) {
   return kChainAndPlaneMaxRank - length + 1 - 0 + 1;
 }
 
+
+enum Suit {
+  kInvalidSuit = -1,
+  kClubsSuit = 0,
+  kDiamondsSuit,
+  kHeartsSuit,
+  kSpadesSuit
+};
+
+inline constexpr int kBlackJoker = 13;
+inline constexpr int kRedJoker = 14;
+
 inline constexpr int kNumSuits = 4;
 inline constexpr int kNumNormalCards = kNumCardsPerSuit * kNumSuits;
 
@@ -159,6 +171,9 @@ inline constexpr int kNumDistinctMoves =
 
 constexpr char kSuitChar[] = "CDHS";
 constexpr char kRankChar[] = "3456789TJQKA2BR";
+
+int RankCharToRank(const char& rank_char);
+Suit SuitCharToSuit(const char& suit_char);
 
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_

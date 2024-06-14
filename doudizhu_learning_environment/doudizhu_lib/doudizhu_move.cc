@@ -64,13 +64,13 @@ std::string DoudizhuMove::ToString() const {
     case kDeal:return "(Deal " + deal_card_.ToString() + ")";
     case kAuction:
       if (auction_type_ == AuctionType::kPass) {
-        return "(Pass)";
+        return "(Bid Pass)";
       }
       return "(Bid " + std::to_string(static_cast<int>(auction_type_)) + ")";
     case kPlay: {
       std::string rv{"(Play "};
       switch (play_type_) {
-        case PlayType::kPass:return "(Pass)";
+        case PlayType::kPass:return "(Play Pass)";
         case PlayType::kSolo:
         case PlayType::kPair:
         case PlayType::kTrio:
@@ -143,6 +143,7 @@ bool DoudizhuMove::operator==(const DoudizhuMove &other_move) const {
         return false;
       }
       switch (play_type_) {
+        case PlayType::kPass:return true;
         case PlayType::kSolo:
         case PlayType::kPair:
         case PlayType::kTrio:
@@ -422,7 +423,7 @@ std::vector<std::vector<int>> GetPossibleKickers(const QuadComb &quad_comb) {
           if (rank == another_rank && rank >= kBlackJoker) {
             continue;
           }
-          kickers.push_back({rank, another_rank});
+          kickers.push_back(SortedCopy(std::vector<int>{rank, another_rank}, /*ascending=*/true));
         }
       }
       return kickers;
@@ -437,7 +438,7 @@ std::vector<std::vector<int>> GetPossibleKickers(const QuadComb &quad_comb) {
           if (another_rank == quad_comb.quad_rank) {
             continue;
           }
-          kickers.push_back({rank, rank, another_rank, another_rank});
+          kickers.push_back(SortedCopy(std::vector<int>{rank, rank, another_rank, another_rank}, /*ascending=*/true));
         }
       }
       return kickers;
@@ -484,7 +485,12 @@ std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane) {
                 || solo_rank == pair_rank) {
               continue;
             }
-            res.push_back({pair_rank, pair_rank, solo_rank});
+            if (pair_rank > solo_rank) {
+              res.push_back({solo_rank, pair_rank, pair_rank});
+            } else {
+              res.push_back({pair_rank, pair_rank, solo_rank});
+            }
+
           }
         }
         auto contains_br = [](const std::vector<int> &comb) {
@@ -511,7 +517,7 @@ std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane) {
                 continue;
               }
               for (const int joker : {kBlackJoker, kRedJoker}) {
-                res.push_back({x_rank, y_rank, z_rank, joker});
+                res.push_back(SortedCopy(std::vector<int>{x_rank, y_rank, z_rank, joker}, /*ascending=*/true));
               }
             }
           }
@@ -536,7 +542,7 @@ std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane) {
                                                 plane.start_rank + plane.length))) {
                   continue;
                 }
-                res.push_back({a_rank, b_rank, c_rank, d_rank});
+                res.push_back(SortedCopy(std::vector<int>{a_rank, b_rank, c_rank, d_rank}, /*ascending=*/true));
               }
             }
           }
@@ -565,7 +571,8 @@ std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane) {
                   continue;
                 }
                 for (const int joker : {kBlackJoker, kRedJoker}) {
-                  res.push_back({a_rank, b_rank, c_rank, d_rank, joker});
+                  res.push_back(SortedCopy(std::vector<int>{a_rank, b_rank, c_rank, d_rank, joker}, /*ascending=*/
+                                           true));
                 }
               }
             }
@@ -592,7 +599,7 @@ std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane) {
                     continue;
                   }
                   if (HasBomb(rank_comb))continue;
-                  res.push_back(rank_comb);
+                  res.push_back(SortedCopy(rank_comb, /*ascending=*/true));
                 }
               }
             }
@@ -655,6 +662,7 @@ std::vector<std::vector<int>> GetPossibleKickers(const Plane &plane) {
   }
 
 }
+
 bool HandCanMakeMove(const DoudizhuHand &hand, const DoudizhuMove &move) {
   if (move.GetPlayType() == DoudizhuMove::PlayType::kPass)return true;
   const auto ranks = move.ToRanks();
@@ -668,5 +676,497 @@ bool HandCanMakeMove(const DoudizhuHand &hand, const DoudizhuMove &move) {
     hand_copy.RemoveFromHand(rank);
   }
   return flag;
+}
+
+std::vector<int> PlayMoveStringToRanks(const std::string &play_move_str) {
+  std::vector<int> ranks{};
+  ranks.reserve(play_move_str.size());
+  for (const auto &c : play_move_str) {
+    ranks.push_back(RankCharToRank(c));
+  }
+  return ranks;
+}
+
+std::vector<int> PlayMovesStringToSortedRanks(const std::string &play_move_str) {
+  auto ranks = PlayMoveStringToRanks(play_move_str);
+  std::sort(ranks.begin(), ranks.end());
+  return ranks;
+}
+
+std::tuple<std::vector<int>, std::vector<int>> GetTargetRanksAndKickers(const std::unordered_map<char, int> &m,
+                                                                        const int target) {
+  CHECK_GE(target, kTrioLength);
+  CHECK_LE(target, kQuadLength);
+  std::vector<int> target_rank{};
+  std::vector<int> kickers{};
+  for (const auto &kv : m) {
+    if (kv.second == target && RankCharToRank(kv.first) <= kChainAndPlaneMaxRank) {
+      target_rank.push_back(RankCharToRank(kv.first));
+    } else {
+      for (int i = 0; i < kv.second; ++i) {
+        kickers.push_back(RankCharToRank(kv.first));
+      }
+    }
+  }
+  if (!IsVectorConsecutive(SortedCopy(target_rank))) {
+    const int rank = FindNonContinuousNumber(target_rank);
+    target_rank.erase(std::remove(target_rank.begin(), target_rank.end(), rank), target_rank.end());
+    for (int i = 0; i < m.at(kRankChar[rank]); ++i) {
+      kickers.push_back(rank);
+    }
+  }
+  return std::make_tuple(target_rank, SortedCopy(kickers));
+}
+
+DoudizhuMove GetChainMoveFromString(const std::string &move_str, const int num_ranks,
+                                    const ChainType chain_type) {
+  auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+  auto last = std::unique(sorted_ranks.begin(), sorted_ranks.end());
+  sorted_ranks.erase(last, sorted_ranks.end());
+  CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+  const int start_rank = sorted_ranks[0];
+  CHECK_GE(start_rank, 0);
+  CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+  return DoudizhuMove{/*chain=*/
+      Chain{/*chain_type=*/chain_type, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+}
+
+DoudizhuMove GetMoveFromString(const std::string &move_str,
+                               DoudizhuMove::Type move_type) {
+  if (move_type == DoudizhuMove::kInvalid) {
+    return {};
+  }
+  if (move_type == DoudizhuMove::kDeal) {
+    CHECK_LT(move_str.length(), 2);
+    // A deal move should be a card including suit and rank or a joker.
+    if (move_str.length() == 1) {
+      if (std::toupper(move_str[0]) == 'R') {
+        return DoudizhuMove{/*deal_card=*/DoudizhuCard{/*rank=*/kRedJoker, /*suit=*/kInvalidSuit}};
+      }
+      if (std::toupper(move_str[0]) == 'B') {
+        return DoudizhuMove{/*deal_card=*/DoudizhuCard{/*rank=*/kBlackJoker, /*suit=*/kInvalidSuit}};
+      }
+      FatalError("Deal move " + move_str + " cannot be converted to a move.");
+    }
+    if (move_str.length() == 2) {
+      Suit suit = SuitCharToSuit(move_str[0]);
+      int rank = RankCharToRank(move_str[1]);
+      return DoudizhuMove{/*deal_card=*/DoudizhuCard{/*rank=*/rank, /*suit=*/suit}};
+    }
+  }
+  if (move_type == DoudizhuMove::kAuction) {
+    CHECK_GT(move_str.length(), 0);
+    if (std::toupper(move_str[0]) == 'P') {
+      return DoudizhuMove{/*auction_type=*/DoudizhuMove::AuctionType::kPass};
+    }
+    const int bid = move_str[0] - '0';
+    CHECK_GE(bid, 1);
+    CHECK_LE(bid, kNumBids);
+    return DoudizhuMove{/*auction_type=*/DoudizhuMove::AuctionType(bid)};
+  }
+  if (move_type == DoudizhuMove::kPlay) {
+    if (std::toupper(move_str[0]) == 'P') {
+      return DoudizhuMove{/*play_type=*/DoudizhuMove::PlayType::kPass};
+    }
+    const auto counter = GetStringCounter(move_str);
+    const int num_cards = static_cast<int>(move_str.size());
+    int num_ranks = static_cast<int>(counter.size());
+    std::vector<char> keys{};
+    std::vector<int> values{};
+    std::vector<int> ranks{};
+    keys.reserve(counter.size());
+    values.reserve(counter.size());
+    ranks.reserve(counter.size());
+    for (const auto &kv : counter) {
+      keys.push_back(kv.first);
+      values.push_back(kv.second);
+      ranks.push_back(RankCharToRank(kv.first));
+    }
+    if (num_cards == 1) {
+      // Single card.
+      const SingleRank single_rank{/*r=*/ranks[0], /*n=*/1};
+      return DoudizhuMove{/*single_rank=*/single_rank};
+    }
+    if (num_cards == 2) {
+      // Pair or joker.
+      if (num_ranks == 1) {
+        // Pair.
+        return DoudizhuMove{/*single_rank=*/SingleRank{/*r=*/ranks[0], /*n=*/2}};
+      }
+      if (num_ranks == 2) {
+        // Should be rockets.
+        CHECK_TRUE(counter.count('B'));
+        CHECK_TRUE(counter.count('R'));
+        return DoudizhuMove{/*play_type*/DoudizhuMove::PlayType::kRocket};
+      }
+      FatalError("Should not reach here.");
+    }
+    if (num_cards == 3) {
+      // Trio.
+      CHECK_EQ(num_ranks, 1);
+      CHECK_GE(ranks[0], 0);
+      CHECK_LT(ranks[0], kBlackJoker);
+      return DoudizhuMove{/*single_rank=*/SingleRank{/*r=*/ranks[0], /*n=*/3}};
+    }
+    if (num_cards == 4) {
+      // Trio with solo or bomb.
+      if (num_ranks == 1) {
+        // Bomb.
+        CHECK_GE(ranks[0], 0);
+        CHECK_LT(ranks[0], kBlackJoker);
+        return DoudizhuMove{/*single_rank=*/SingleRank{/*r=*/ranks[0], /*n=*/4}};
+      } else {
+        // Trio with solo.
+        CHECK_EQ(num_ranks, 2);
+        int trio_rank, kicker_rank;
+        if (values[0] == kTrioLength) {
+          trio_rank = ranks[0];
+          kicker_rank = ranks[1];
+        } else {
+          trio_rank = ranks[1];
+          kicker_rank = ranks[0];
+        }
+        CHECK_LT(trio_rank, kBlackJoker);
+        return DoudizhuMove{/*trio_comb=*/TrioComb{/*kt=*/kSolo, /*tr=*/trio_rank},
+            /*kickers=*/{kicker_rank}};
+      }
+    }
+    if (num_cards == 5) {
+      // Trio with pair or chain of solo.
+      if (num_ranks == 2) {
+        int trio_rank, kicker_rank;
+        if (values[0] == kTrioLength) {
+          trio_rank = ranks[0];
+          kicker_rank = ranks[1];
+        } else {
+          trio_rank = ranks[1];
+          kicker_rank = ranks[0];
+        }
+        CHECK_LT(trio_rank, kBlackJoker);
+        CHECK_LT(kicker_rank, kBlackJoker);
+        return DoudizhuMove{/*trio_comb=*/TrioComb{/*kt=*/kPair, /*tr=*/trio_rank},
+            /*kickers=*/{kicker_rank, kicker_rank}};
+      } else {
+        const auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+        CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+        const int start_rank = sorted_ranks[0];
+        CHECK_GE(start_rank, 0);
+        CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+        return DoudizhuMove{/*chain=*/
+            Chain{/*chain_type=*/ChainType::kSolo, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+      }
+    }
+    if (num_cards == 6) {
+      // Chain of pair, Chain of solo, Chain of Trio, quad with solo.
+      if (num_ranks == 6) {
+        // Chain of solo.
+        const auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+        CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+        const int start_rank = sorted_ranks[0];
+        CHECK_GE(start_rank, 0);
+        CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+        return DoudizhuMove{/*chain=*/
+            Chain{/*chain_type=*/ChainType::kSolo, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+      }
+      if (num_ranks == 3) {
+        // Chain of pair or quad with solo.
+        if (values == std::vector<int>{2, 2, 2}) {
+          // Chain of pair.
+          CHECK_TRUE(IsVectorConsecutive(ranks));
+          const int start_rank = SortedCopy(ranks)[0];
+          CHECK_GE(start_rank, 0);
+          CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+          return DoudizhuMove{/*chain=*/
+              Chain{/*chain_type=*/ChainType::kPair, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+        }
+        const auto sorted_values = SortedCopy(values, /*ascending=*/true);
+        if (sorted_values != std::vector<int>{1, 1, 4}) {
+          FatalError("Can not convert move string " + move_str + " to a move.");
+        }
+        int quad_rank;
+        std::vector<int> kickers{};
+        for (const auto &kv : counter) {
+          if (kv.second == kQuadLength) {
+            quad_rank = RankCharToRank(kv.first);
+          } else {
+            kickers.push_back(RankCharToRank(kv.first));
+          }
+        }
+        CHECK_LT(quad_rank, kBlackJoker);
+        return DoudizhuMove{/*quad_comb=*/QuadComb{/*kt=*/kSolo, /*qr*/quad_rank},
+            /*kickers=*/SortedCopy(kickers, /*ascending=*/true)};
+      }
+      if (num_ranks == 2) {
+        // Quad with solo or chain of trio.
+        if (values[0] == 3) {
+          // chain of trio.
+          CHECK_EQ(values[1], 3);
+          const auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+          CHECK_TRUE(IsVectorConsecutive(SortedCopy(ranks)));
+          const int start_rank = sorted_ranks[0];
+          CHECK_GE(start_rank, 0);
+          CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+          return DoudizhuMove{/*chain=*/
+              Chain{/*chain_type=*/ChainType::kTrio, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+        }
+        const auto sorted_values = SortedCopy(values, /*ascending=*/true);
+        if (sorted_values != std::vector<int>{2, 4}) {
+          FatalError("Can not convert move string " + move_str + " to a move.");
+        }
+        int quad_rank;
+        std::vector<int> kickers{};
+        for (const auto &kv : counter) {
+          if (kv.second == kQuadLength) {
+            quad_rank = RankCharToRank(kv.first);
+          } else {
+            kickers.push_back(RankCharToRank(kv.first));
+            kickers.push_back(RankCharToRank(kv.first));
+          }
+        }
+        CHECK_LT(quad_rank, kBlackJoker);
+        return DoudizhuMove{/*quad_comb=*/QuadComb{/*kt=*/kSolo, /*qr*/quad_rank}, /*kickers=*/kickers};
+      }
+    }
+    if (num_cards == 7) {
+      // Only chain of solo.
+      CHECK_EQ(num_ranks, num_cards);
+      const auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+      CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+      const int start_rank = sorted_ranks[0];
+      CHECK_GE(start_rank, 0);
+      CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+      return DoudizhuMove{/*chain=*/
+          Chain{/*chain_type=*/ChainType::kSolo, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+    }
+    if (num_cards == 8) {
+      // Chain of solo, chain of pair, plane with solo, quad with pair.
+      if (num_ranks == num_cards) {
+        // Chain of solo.
+        const auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+        CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+        const int start_rank = sorted_ranks[0];
+        CHECK_GE(start_rank, 0);
+        CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+        return DoudizhuMove{/*chain=*/
+            Chain{/*chain_type=*/ChainType::kSolo, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+      }
+      if (num_ranks == 4) {
+        // Chain of pair or plane with solo.
+        const auto sorted_values = SortedCopy(values, /*ascending=*/true);
+        if (sorted_values == std::vector<int>{2, 2, 2, 2}) {
+          const int start_rank = SortedCopy(ranks)[0];
+          CHECK_GE(start_rank, 0);
+          CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+          return DoudizhuMove{/*chain=*/
+              Chain{/*chain_type=*/ChainType::kPair, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+        }
+
+        if (sorted_values == std::vector<int>{1, 1, 3, 3}) {
+          // Plane with solo.
+          const auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, kTrioLength);
+          const auto sorted_ranks = SortedCopy(trio_ranks);
+          CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+          const int start_rank = sorted_ranks[0];
+          return DoudizhuMove{/*plane=*/Plane{/*kt*/kSolo, /*l=*/2, /*sr=*/start_rank}, /*kickers=*/kickers};
+        }
+        FatalError("Can not convert move string " + move_str + " to a move.");
+      }
+      if (num_ranks == 3) {
+        // Quad with pair ot plane with solo.
+        const auto sorted_values = SortedCopy(values, /*ascending=*/true);
+        if (sorted_values == std::vector<int>{2, 2, 4}) {
+          // Quad with pair.
+          int quad_rank;
+          std::vector<int> kickers{};
+          for (const auto &kv : counter) {
+            if (kv.second == kQuadLength) {
+              quad_rank = RankCharToRank(kv.first);
+            } else {
+              for (int i = 0; i < kPairLength; ++i) {
+                kickers.push_back(RankCharToRank(kv.first));
+              }
+            }
+          }
+          CHECK_EQ(kickers.size(), kPairLength * 2);
+          CHECK_LT(quad_rank, kBlackJoker);
+          return DoudizhuMove{/*quad_comb=*/QuadComb{/*kt=*/kPair, /*qr*/quad_rank},
+              /*kickers=*/SortedCopy(kickers, /*ascending=*/true)};
+        }
+        if (sorted_values == std::vector<int>{2, 3, 3}) {
+          const auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, kTrioLength);
+          const auto sorted_ranks = SortedCopy(trio_ranks);
+          CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+          const int start_rank = sorted_ranks[0];
+          return DoudizhuMove{/*plane=*/Plane{/*kt*/kSolo, /*l=*/2, /*sr=*/start_rank}, /*kickers=*/kickers};
+        }
+        FatalError("Can not convert move string " + move_str + " to a move.");
+      }
+      FatalError("Can not convert move string " + move_str + " to a move.");
+    }
+    if (num_cards == 9) {
+      // Chain of trio, Chain of solo.
+      if (num_ranks == 3) {
+        const auto [trio_ranks, _] = GetTargetRanksAndKickers(counter, kTrioLength);
+        const auto sorted_ranks = SortedCopy(trio_ranks, /*ascending=*/true);
+        CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+        return DoudizhuMove{/*chain=*/
+            Chain{/*chain_type=*/ChainType::kTrio, /*length=*/3, /*start_rank=*/sorted_ranks[0]}};
+      }
+      if (num_ranks == 9) {
+        return GetChainMoveFromString(move_str, num_ranks, ChainType::kSolo);
+      }
+      FatalError("Can not convert move string " + move_str + " to a move.");
+    }
+    if (num_cards == 10) {
+      // Chain of solo or chain of pair or plane with pair.
+      if (num_ranks == num_cards) {
+        const auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+        CHECK_TRUE(IsVectorConsecutive(sorted_ranks));
+        const int start_rank = sorted_ranks[0];
+        CHECK_GE(start_rank, 0);
+        CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+        return DoudizhuMove{/*chain=*/
+            Chain{/*chain_type=*/ChainType::kSolo, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+      }
+      if (num_ranks == 5) {
+        const int start_rank = SortedCopy(ranks)[0];
+        CHECK_GE(start_rank, 0);
+        CHECK_LE(start_rank, kChainAndPlaneMaxRank - num_ranks + 1);
+        return DoudizhuMove{/*chain=*/
+            Chain{/*chain_type=*/ChainType::kPair, /*length=*/num_ranks, /*start_rank=*/start_rank}};
+      }
+      if (num_ranks == 4) {
+        // Plane with pair.
+        auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, kTrioLength);
+        std::sort(trio_ranks.begin(), trio_ranks.end());
+        return DoudizhuMove{/*plane=*/Plane{/*kt=*/kPair, /*l=*/2, /*sr=*/trio_ranks[0]}, /*kickers=*/kickers};
+      }
+      FatalError("Can not convert move string " + move_str + " to a move.");
+    }
+    if (num_cards == 11) {
+      // Can only be a chain of solo.
+      CHECK_EQ(num_cards, num_ranks);
+      return GetChainMoveFromString(move_str, num_ranks, ChainType::kSolo);
+    }
+    if (num_cards == 12) {
+      // Chain of solo, chain of pair, chain of trio, plane with solo.
+      if (num_ranks == num_cards) {
+        // Chain of solo.
+        return GetChainMoveFromString(move_str, num_ranks, ChainType::kSolo);
+      }
+      if (num_ranks == 6) {
+        // Chain of pair.
+        const std::vector<int> required_counts = {2, 2, 2, 2, 2, 2};
+        if (values == required_counts) {
+          return GetChainMoveFromString(move_str, num_ranks, ChainType::kPair);
+        }
+      }
+      const auto [trio_ranks, _] = GetTargetRanksAndKickers(counter, kTrioLength);
+      auto sorted_trio_ranks = SortedCopy(trio_ranks);
+      if (num_ranks == 4 && IsVectorConsecutive(sorted_trio_ranks)
+          && sorted_trio_ranks.size() == 4 && sorted_trio_ranks.back() <= kChainAndPlaneMaxRank) {
+        // Chain of trio.
+        return GetChainMoveFromString(move_str, num_ranks, ChainType::kTrio);
+      }
+      // Should be Plane with solo.
+//      auto sorted_ranks = PlayMovesStringToSortedRanks(move_str);
+//      auto last = std::unique(sorted_ranks.begin(), sorted_ranks.end());
+//      sorted_ranks.erase(last, sorted_ranks.end());
+      std::vector<int> sorted_plane_ranks;
+      if (IsVectorConsecutive(std::vector<int>(sorted_trio_ranks.begin(), sorted_trio_ranks.begin() + 3))) {
+        sorted_plane_ranks = std::vector<int>(sorted_trio_ranks.begin(), sorted_trio_ranks.begin() + 3);
+      } else {
+        sorted_plane_ranks = std::vector<int>(sorted_trio_ranks.begin() + 1, sorted_trio_ranks.begin() + 4);
+      }
+
+//      auto plane_ranks = std::vector<int>(sorted_ranks.begin(), sorted_ranks.begin() + 3);
+      CHECK_TRUE(IsVectorConsecutive(sorted_plane_ranks));
+      std::vector<int> kickers{};
+      for (const auto &kv : counter) {
+        if (RankCharToRank(kv.first) < sorted_plane_ranks[0] || RankCharToRank(kv.first) > sorted_plane_ranks.back()) {
+          for (int i = 0; i < kv.second; ++i) {
+            kickers.push_back(RankCharToRank(kv.first));
+          }
+        }
+      }
+      CHECK_EQ(kickers.size(), 3);
+      return DoudizhuMove{/*plane=*/Plane{/*kt=*/kSolo, /*l=*/3, /*sr=*/sorted_plane_ranks[0]}, /*kickers=*/
+                                    SortedCopy(kickers)};
+    }
+    if (num_cards == 14) {
+      // Only chain of pair.
+      return GetChainMoveFromString(move_str, /*num_ranks=*/7, /*chain_type=*/ChainType::kPair);
+    }
+    if (num_cards == 15) {
+      // Chain of trio or plane with pair.
+      if (num_ranks == 5) {
+        // Chain of trio.
+        return GetChainMoveFromString(move_str, /*num_ranks=*/5, /*chain_type=*/ChainType::kTrio);
+      }
+      CHECK_EQ(num_ranks, 6);
+      const auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, /*target=*/kTrioLength);
+      return DoudizhuMove{/*plane=*/Plane{/*kt=*/kPair, /*l=*/3, /*sr=*/SortedCopy(trio_ranks)[0]}, /*kickers=*/
+                                    kickers};
+    }
+    if (num_cards == 16) {
+      // Chain of pair ot plane with solo.
+      const std::vector<int> required_chain_of_pair_values(8, kPairLength);
+      if (num_ranks == 8 && values == required_chain_of_pair_values) {
+        return GetChainMoveFromString(move_str, /*num_ranks=*/num_ranks, /*chain_type=*/ChainType::kPair);
+      }
+      const auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, /*target=*/kTrioLength);
+      CHECK_EQ(trio_ranks.size(), 4);
+      CHECK_EQ(kickers.size(), 4);
+      CHECK_TRUE(IsVectorConsecutive(SortedCopy(trio_ranks)));
+      return DoudizhuMove{/*plane=*/Plane{/*kt=*/kSolo, /*l=*/4, /*sr=*/SortedCopy(trio_ranks)[0]},
+          /*kickers=*/kickers};
+    }
+    if (num_cards == 18) {
+      // Chain of pair or chain of trio.
+      if (num_ranks == num_cards / kPairLength) {
+        // Chain of pair.
+        return GetChainMoveFromString(/*move_str=*/move_str, /*num_ranks=*/num_ranks, /*chain_type=*/ChainType::kPair);
+      }
+      // Chain of trio.
+      CHECK_EQ(num_ranks, num_cards / kTrioLength);
+      return GetChainMoveFromString(/*move_str=*/move_str, /*num_ranks=*/num_ranks, /*chain_type=*/ChainType::kTrio);
+    }
+    if (num_cards == 20) {
+      // Chain of pair, plane with solo, plane with pair.
+      if (num_ranks == num_cards / (kTrioLength + kPairLength) * 2) {
+        // Plane with pair.
+        const int plane_length = num_cards / (kTrioLength + kPairLength);
+        const auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, /*target=*/kTrioLength);
+        if (trio_ranks.size() == plane_length) {
+          CHECK_TRUE(IsVectorConsecutive(SortedCopy(trio_ranks)));
+          CHECK_EQ(trio_ranks.size(), plane_length);
+          CHECK_EQ(kickers.size(), plane_length * kPairLength);
+          return DoudizhuMove{/*plane=*/Plane{/*kt=*/kPair, /*l=*/plane_length, /*sr=*/SortedCopy(trio_ranks)[0]},
+              /*kickers=*/kickers};
+        }
+      }
+      const int chain_length = num_cards / kPairLength;
+      const std::vector<int> required_chain_of_pair_values(num_cards / kPairLength, kPairLength);
+      if (num_ranks == chain_length && values == required_chain_of_pair_values) {
+        // Chain of pair.
+        return GetChainMoveFromString(/*move_str=*/move_str, /*num_ranks=*/num_ranks, /*chain_type=*/ChainType::kPair);
+      }
+      // Should be Plane with solo.
+      const int plane_length = num_cards / (kTrioLength + 1);
+      const auto [trio_ranks, kickers] = GetTargetRanksAndKickers(counter, /*target=*/kTrioLength);
+      CHECK_TRUE(IsVectorConsecutive(SortedCopy(trio_ranks)));
+      CHECK_EQ(trio_ranks.size(), plane_length);
+      CHECK_EQ(kickers.size(), plane_length);
+      return DoudizhuMove{/*plane=*/Plane{/*kt=*/kSolo, /*l=*/plane_length, /*sr=*/SortedCopy(trio_ranks)[0]},
+          /*kickers=*/kickers};
+    }
+    FatalError("Should not reach here.");
+  }
+  FatalError("move_type " + std::to_string(move_type) + "is wrong");
+}
+
+std::ostream &operator<<(std::ostream &os, const DoudizhuMove &move) {
+  os << move.ToString();
+  return os;
 }
 }

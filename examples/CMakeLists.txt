@@ -6,3 +6,6 @@ add_subdirectory(../doudizhu_learning_environment/doudizhu_lib doudizhu_lib)
 
 add_executable(game_example game_example.cc)
 target_link_libraries(game_example LINK_PUBLIC doudizhu)
+
+add_executable(console_play console_play.cc)
+target_link_libraries(console_play LINK_PUBLIC doudizhu)

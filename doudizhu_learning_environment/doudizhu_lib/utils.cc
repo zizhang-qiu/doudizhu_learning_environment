@@ -104,5 +104,48 @@ std::vector<int> Range(int start, int stop, int step) {
 
   return result;
 }
+std::unordered_map<char, int> GetStringCounter(const std::string &str) {
+  std::unordered_map<char, int> counter{};
+  for (const char &c : str) {
+    ++counter[c];
+  }
+  return counter;
+}
+bool IsVectorConsecutive(const std::vector<int> &vec) {
+  if (vec.size() <= 1) {
+    return true;
+  }
+  const auto sorted_vec = SortedCopy(vec, /*ascending=*/true);
+  for (int i = 1; i < static_cast<int>(sorted_vec.size()); ++i) {
+    if (sorted_vec[i] != sorted_vec[0] + i) {
+      return false;
+    }
+  }
+  return true;
+}
+int FindNonContinuousNumber(const std::vector<int> &nums) {
+  if (nums.size() < 2) {
+    throw std::invalid_argument("The array must have at least two elements.");
+  }
+
+  std::vector<int> sortedNums = nums;
+  std::sort(sortedNums.begin(), sortedNums.end());
+
+  if (sortedNums[1] != sortedNums[0] + 1) {
+    return sortedNums[0];
+  }
+
+  if (sortedNums[sortedNums.size() - 1] != sortedNums[sortedNums.size() - 2] + 1) {
+    return sortedNums[sortedNums.size() - 1];
+  }
+
+  for (size_t i = 1; i < sortedNums.size() - 1; ++i) {
+    if (sortedNums[i] != sortedNums[i - 1] + 1 && sortedNums[i] != sortedNums[i + 1] - 1) {
+      return sortedNums[i];
+    }
+  }
+
+  throw std::runtime_error("No non-continuous number found.");
+}
 
 }  // namespace doudizhu_learning_env

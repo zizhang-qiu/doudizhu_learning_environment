@@ -10,16 +10,6 @@
 #include "doudizhu_utils.h"
 namespace doudizhu_learning_env {
 
-enum Suit {
-  kInvalidSuit = -1,
-  kClubsSuit = 0,
-  kDiamondsSuit,
-  kHeartsSuit,
-  kSpadesSuit
-};
-
-inline constexpr int kBlackJoker = 13;
-inline constexpr int kRedJoker = 14;
 
 constexpr std::array<Suit, kNumSuits> kAllSuits = {kClubsSuit, kDiamondsSuit, kHeartsSuit, kSpadesSuit};
 

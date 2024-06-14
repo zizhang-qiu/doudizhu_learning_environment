@@ -33,5 +33,5 @@ The library can also be used by other programs using cmake `add_subdirectory()` 
 - [ ] Doudizhu observation encoders.
 - [ ] Gym-like rl envs.
 - [x] Doudizhu game examples.
-- [ ] Add a function to create moves from string.
+- [x] Add a function to create moves from string.
 - [x] Add a function to get move uid from move.

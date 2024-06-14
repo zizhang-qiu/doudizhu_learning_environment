@@ -32,6 +32,8 @@ constexpr int Combination(int n, int r) {
   return res;
 }
 
+std::unordered_map<char, int> GetStringCounter(const std::string &str);
+
 std::vector<int> Range(int start, int stop, int step = 1);
 
 void CombineHelper(const std::vector<int> &nums,
@@ -41,6 +43,23 @@ void CombineHelper(const std::vector<int> &nums,
                    std::vector<std::vector<int>> &result);
 
 std::vector<std::vector<int>> Combine(const std::vector<int> &nums, int k);
+
+template<typename T>
+std::vector<T> SortedCopy(const std::vector<T> &vec, bool ascending = true) {
+  std::vector<T> sorted = vec;
+
+  if (ascending) {
+    std::sort(sorted.begin(), sorted.end());
+  } else {
+    std::sort(sorted.begin(), sorted.end(), std::greater<T>());
+  }
+
+  return sorted;
+}
+
+bool IsVectorConsecutive(const std::vector<int> &vec);
+
+int FindNonContinuousNumber(const std::vector<int> &nums);
 
 // Make sure that arbitrary structures can be printed out.
 template<typename T>

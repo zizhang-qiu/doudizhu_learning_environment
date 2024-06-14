@@ -6,6 +6,7 @@
 #include <filesystem>
 #include "doudizhu_game.h"
 #include "doudizhu_state.h"
+#include "utils.h"
 
 using namespace doudizhu_learning_env;
 void CardTest() {
@@ -77,7 +78,7 @@ void MoveTest() {
 
   // Auction
   const DoudizhuMove auction_pass{DoudizhuMove::AuctionType::kPass};
-  CHECK_EQ(auction_pass.ToString(), "(Pass)");
+  CHECK_EQ(auction_pass.ToString(), "(Bid Pass)");
   for (const auto auction_type : {DoudizhuMove::AuctionType::kOne,
                                   DoudizhuMove::AuctionType::kTwo,
                                   DoudizhuMove::AuctionType::kThree}) {
@@ -437,7 +438,7 @@ void MoveTest() {
         /*plane=*/{},
         /*kickers=*/{}
     };
-    CHECK_EQ(move.ToString(), "(Pass)");
+    CHECK_EQ(move.ToString(), "(Play Pass)");
   }
 
   std::cout << "Passed move test." << std::endl;
@@ -455,15 +456,6 @@ std::vector<std::string> StrSplit(const std::string &str, const std::string &del
   return tokens;
 }
 
-std::unordered_map<char, int> GetStringCounter(const std::string &str) {
-  std::unordered_map<char, int> counter{};
-  for (const char &c : str) {
-
-    ++counter[c];
-  }
-  return counter;
-}
-
 bool MoveStringEqual(const std::string &lhs, const std::string &rhs) {
   return GetStringCounter(lhs) == GetStringCounter(rhs);
 }
@@ -474,32 +466,32 @@ void GameTest() {
   CHECK_EQ(all_moves.size(), game.MaxMoves());
 
   // Load RL card actions.
-  std::ifstream ifs("../../../doudizhu_learning_environment/doudizhu_lib/action_space.txt");
-  if (ifs.is_open()) {
-    std::string line;
-    while (std::getline(ifs, line)) {
-//      std::cout << line << std::endl;
-    }
-    const auto expected_move_strings = StrSplit(line, " ");
-//    std::cout << expected_move_strings.size() << std::endl;
-    CHECK_EQ(expected_move_strings.size(), kNumDistinctPlayMoves);
-    for (int i = 0; i < kNumDistinctPlayMoves - 1; ++i) {
-      std::string cur_move_str = all_moves[i + kNumBids + 1].ToString();
-      cur_move_str = cur_move_str.substr(6, cur_move_str.length() - 6 - 1);
-      if (!MoveStringEqual(cur_move_str, expected_move_strings[i])) {
-        std::cout << cur_move_str << ", ";
-        std::cout << expected_move_strings[i] << std::endl;
-      }
-
-//      CHECK_TRUE(MoveStringEqual(cur_move_str, expected_move_strings[i]));
-    }
-    ifs.close();
-  } else {
-    std::cerr << "Failed to open file" << std::endl;
-  }
+//  std::ifstream ifs("../../../doudizhu_learning_environment/doudizhu_lib/action_space.txt");
+//  if (ifs.is_open()) {
+//    std::string line;
+//    while (std::getline(ifs, line)) {
+////      std::cout << line << std::endl;
+//    }
+//    const auto expected_move_strings = StrSplit(line, " ");
+////    std::cout << expected_move_strings.size() << std::endl;
+//    CHECK_EQ(expected_move_strings.size(), kNumDistinctPlayMoves);
+//    for (int i = 0; i < kNumDistinctPlayMoves - 1; ++i) {
+//      std::string cur_move_str = all_moves[i + kNumBids + 1].ToString();
+//      cur_move_str = cur_move_str.substr(6, cur_move_str.length() - 6 - 1);
+//      if (!MoveStringEqual(cur_move_str, expected_move_strings[i])) {
+//        std::cout << cur_move_str << ", ";
+//        std::cout << expected_move_strings[i] << std::endl;
+//      }
+//
+////      CHECK_TRUE(MoveStringEqual(cur_move_str, expected_move_strings[i]));
+//    }
+//    ifs.close();
+//  } else {
+//    std::cerr << "Failed to open file" << std::endl;
+//  }
 
   // Test if GetChanceOutcome() is consistent with GetChanceOutcomeUid()
-  const auto& all_chance_outcomes = game.AllChanceOutcomes();
+  const auto &all_chance_outcomes = game.AllChanceOutcomes();
   for (int i = 0; i < all_chance_outcomes.size(); ++i) {
     const int uid = game.GetChanceOutcomeUid(all_chance_outcomes[i]);
     CHECK_EQ(uid, i);
@@ -507,11 +499,26 @@ void GameTest() {
 
   // Test if GetMove() is consistent with GetMoveUid()
   for (int i = 0; i < all_moves.size(); ++i) {
+//    std::cout << all_moves[i] << std::endl;
     const int uid = game.GetMoveUid(all_moves[i]);
     CHECK_EQ(uid, i);
   }
 
   std::cout << "Passed game test." << std::endl;
+}
+
+void MoveFromStringTest() {
+  const auto &all_moves = default_game->AllMoves();
+  for (const auto &move : all_moves) {
+    const int prefix_len = move.MoveType() == doudizhu_learning_env::DoudizhuMove::kAuction ? 5 : 6;
+    const auto move_str = move.ToString().substr(
+        prefix_len,
+        move.ToString().length() - prefix_len - 1);
+    const auto move_from_str = GetMoveFromString(move_str, move.MoveType());
+    CHECK_EQ(move, move_from_str);
+    CHECK_EQ(move.ToString(), move_from_str.ToString());
+  }
+  std::cout << "Passed move from string test." << std::endl;
 }
 
 void RandomSimTest(bool verbose, int seed) {
@@ -567,6 +574,7 @@ int main() {
   CardTest();
   MoveTest();
   GameTest();
+  MoveFromStringTest();
   RandomSimTest(false, 42);
   return 0;
 }

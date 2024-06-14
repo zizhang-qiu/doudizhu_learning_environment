@@ -250,10 +250,10 @@ class DoudizhuMove {
     }
   }
 
-  // Fast constructor for rockets.
+  // Fast constructor for rockets and pass.
   explicit DoudizhuMove(PlayType play_type)
       : move_type_(kPlay) {
-    CHECK_EQ(static_cast<int>(play_type), static_cast<int>(PlayType::kRocket));
+    CHECK_TRUE(play_type == PlayType::kRocket || play_type == PlayType::kPass);
     play_type_ = play_type;
   }
 
@@ -313,6 +313,13 @@ class DoudizhuMove {
   std::vector<int> kickers_{};
 };
 
+std::ostream &operator<<(std::ostream &os, const DoudizhuMove &move);
+
 bool HandCanMakeMove(const DoudizhuHand &hand, const DoudizhuMove &move);
+
+DoudizhuMove GetChainMoveFromString(const std::string &move_str, int num_ranks,
+                                    ChainType chain_type);
+
+DoudizhuMove GetMoveFromString(const std::string &move_str, DoudizhuMove::Type move_type);
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_MOVE_H_

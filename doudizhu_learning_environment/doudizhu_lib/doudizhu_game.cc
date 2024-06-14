@@ -461,7 +461,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
         const std::vector<int> lengths =
             Range(NumberOfChainOrPlane(kChainOfSoloMinLength), NumberOfChainOrPlane(kChainOfSoloMaxLength), -1);
         const int uid = uid_base + std::accumulate(lengths.begin(),
-                                                   lengths.begin() + move.GetChain().length - kChainOfSoloMinLength,
+                                                   lengths.begin() + (move.GetChain().length - kChainOfSoloMinLength),
                                                    0)
             + move.GetChain().start_rank;
         return uid;
@@ -471,7 +471,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
         const std::vector<int> lengths =
             Range(NumberOfChainOrPlane(kChainOfPairMinLength), NumberOfChainOrPlane(kChainOfPairMaxLength), -1);
         const int uid = uid_base + std::accumulate(lengths.begin(),
-                                                   lengths.begin() + move.GetChain().length - kChainOfPairMinLength,
+                                                   lengths.begin() + (move.GetChain().length - kChainOfPairMinLength),
                                                    0)
             + move.GetChain().start_rank;
         return uid;
@@ -481,7 +481,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
         const std::vector<int> lengths =
             Range(NumberOfChainOrPlane(kChainOfTrioMinLength), NumberOfChainOrPlane(kChainOfTrioMaxLength), -1);
         const int uid = uid_base + std::accumulate(lengths.begin(),
-                                                   lengths.begin() + move.GetChain().length - kChainOfTrioMinLength,
+                                                   lengths.begin() + (move.GetChain().length - kChainOfTrioMinLength),
                                                    0)
             + move.GetChain().start_rank;
         return uid;
