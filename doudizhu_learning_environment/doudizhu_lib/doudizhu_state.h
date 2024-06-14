@@ -43,6 +43,7 @@ enum class Phase {
 class DoudizhuState {
  public:
   explicit DoudizhuState(const std::shared_ptr<DoudizhuGame> &parent_game);
+  bool IsChanceNode() const { return phase_ == Phase::kDeal; }
   bool IsTerminal() const { return phase_ == Phase::kGameOver; }
   int CurrentPlayer() const;
   Phase CurrentPhase() const { return phase_; }

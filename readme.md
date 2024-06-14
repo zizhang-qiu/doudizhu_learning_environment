@@ -35,3 +35,4 @@ The library can also be used by other programs using cmake `add_subdirectory()` 
 - [x] Doudizhu game examples.
 - [x] Add a function to create moves from string.
 - [x] Add a function to get move uid from move.
+- [x] Add a program to allow human play with random agent through console.
