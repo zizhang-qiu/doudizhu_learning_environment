@@ -58,7 +58,7 @@ class DoudizhuState {
   const DoudizhuDeck &Deck() const { return deck_; }
   std::shared_ptr<DoudizhuGame> ParentGame() const { return parent_game_; }
   const std::vector<DoudizhuHistoryItem> &MoveHistory() const { return move_history_; }
-  const std::array<uint8_t, kNumRanks> &PlayedCardsPerRank() const { return played_cards_per_rank_; }
+  const std::array<int, kNumRanks> &PlayedCardsPerRank() const { return played_cards_per_rank_; }
   int Dizhu() const { return dizhu_; }
   int WinningBid() const { return winning_bid_; }
   int NumBombsPlayed() const { return num_bombs_played_; }
@@ -76,7 +76,7 @@ class DoudizhuState {
   // Three landlord cards.
   std::vector<DoudizhuCard> cards_left_over_;
   std::vector<DoudizhuHand> hands_;
-  std::array<uint8_t, kNumRanks> played_cards_per_rank_;
+  std::array<int, kNumRanks> played_cards_per_rank_;
   std::vector<DoudizhuHistoryItem> move_history_;
   std::shared_ptr<DoudizhuGame> parent_game_ = nullptr;
   int winning_bid_ = 0;

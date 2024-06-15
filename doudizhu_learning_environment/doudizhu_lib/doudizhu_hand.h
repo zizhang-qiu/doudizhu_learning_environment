@@ -25,18 +25,18 @@ class DoudizhuHand {
 
   void RemoveFromHand(int rank);
 
-  void RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> &played_cards_per_rank);
+  void RemoveFromHand(int rank, std::array<int, kNumRanks> &played_cards_per_rank);
 
   int Size() const { return num_cards_; }
 
-  std::array<uint8_t, kNumRanks> CardsPerRank() const { return cards_per_rank_; }
+  std::array<int, kNumRanks> CardsPerRank() const { return cards_per_rank_; }
 
   bool CanAdd(int rank) const;
 
   bool CanRemove(int rank) const;
 
  private:
-  std::array<uint8_t, kNumRanks> cards_per_rank_{};
+  std::array<int, kNumRanks> cards_per_rank_{};
   int num_cards_;
 
 };

@@ -10,6 +10,7 @@
 #include "doudizhu_game.h"
 #include "doudizhu_state.h"
 #include "doudizhu_observation.h"
+#include "douzero_encoder.h"
 
 using namespace doudizhu_learning_env;
 using namespace std;
@@ -27,6 +28,15 @@ bool HasThreeOrGreaterEqualWithTarget(const std::vector<int> &nums, int target) 
 
 void Test(std::array<int, 3> &arr) {
   ++(arr)[0];
+}
+
+void ApplyRandomMove(DoudizhuState &state, std::mt19937 &rng) {
+  if (state.IsTerminal()) {
+    return;
+  }
+  const auto legal_moves = state.LegalMoves();
+  const auto random_move = UniformSample(legal_moves, rng);
+  state.ApplyMove(random_move);
 }
 
 std::ostream &operator<<(std::ostream &stream, const DoudizhuMove::PlayType play_type) {
@@ -70,48 +80,43 @@ std::ostream &operator<<(std::ostream &stream, const DoudizhuMove::PlayType play
 
 int main() {
 //  TrioComb trio_comb{kSolo, 0};
-//  DoudizhuState state{default_game};
-  const auto &all_moves = default_game->AllMoves();
-//  std::map<int, std::set<DoudizhuMove::PlayType>> m;
-//  for (const auto &move : all_moves) {
-//    auto move_str = move.ToString();
-//    move_str = move_str.substr(6, move_str.length() - 6 - 1);
-//    m[move_str.length()].emplace(move.GetPlayType());
-//  }
-//  for (const auto &kv : m) {
-//    std::cout << kv.first << ": ";
-//    for (const auto t : kv.second) {
-//      std::cout << t << ", ";
-//    }
-//    std::cout << "\n";
-//  }
-//  for (const auto &move : all_moves) {
-//    const int prefix_len = move.MoveType() == doudizhu_learning_env::DoudizhuMove::kAuction ? 5 : 6;
-//    const auto move_str = move.ToString().substr(
-//        prefix_len,
-//        move.ToString().length() - prefix_len - 1);
-////    std::cout << move_str << std::endl;
-//    const auto move_from_str = GetMoveFromString(move_str, move.MoveType());
-//    if (!(move_from_str == move)){
-//      std::cout << move_str << ", " << move_from_str.ToString() << std::endl;
-//    }
-//  }
-//  for (const std::string str : {"R", "B"}) {
-//    auto move = GetMoveFromString(str, doudizhu_learning_env::DoudizhuMove::kDeal);
-//    std::cout << move.ToString() << std::endl;
-//  }
-//  for (const std::string str : {"p", "pass", "1", "2", "3"}) {
-//    auto move = GetMoveFromString(str, doudizhu_learning_env::DoudizhuMove::kAuction);
-//    std::cout << move.ToString() << std::endl;
-//  }
-//  std::cout << std::boolalpha << IsVectorConsecutive({1, 2, 4}) << std::endl;
-//  auto move = GetMoveFromString("QQKKAA", doudizhu_learning_env::DoudizhuMove::kPlay);
-//  std::cout << move.ToString() << std::endl;
-//  DoudizhuMove::PlayType play_type = DoudizhuMove::PlayType::kRocket;
-//  std::cout << std::boolalpha << (play_type == DoudizhuMove::PlayType::kRocket) << std::endl;
-  const Chain chain{/*chain_type=*/doudizhu_learning_env::ChainType::kSolo, /*length=*/8, /*start_rank=*/0};
-  const DoudizhuMove move{/*chain=*/chain};
-  int uid = default_game->GetMoveUid(move);
-  std::cout << uid << std::endl;
+  DoudizhuState state{default_game};
+  while (state.IsChanceNode()) {
+    state.ApplyRandomChance();
+  }
+  std::mt19937 rng;
+  rng.seed(3);
+  while (state.CurrentPhase() == Phase::kAuction) {
+    ApplyRandomMove(state, rng);
+  }
+  for (int i = 0; i <= 6; ++i) {
+    ApplyRandomMove(state, rng);
+  }
+
+  std::cout << state.ToString() << std::endl;
+  std::cout << state.CurrentPlayer() << std::endl;
+  const DoudizhuObservation obs{state};
+  std::cout << obs.ToString() << std::endl;
+//
+//  const auto hand_feature = EncodeMyHand(obs);
+//  std::cout << hand_feature.encoding << std::endl;
+//
+//  const auto other_hand_feature = EncodeOtherHands(obs);
+//  std::cout << other_hand_feature.encoding << std::endl;
+//
+//  const auto last_move_feature = EncodeLastMove(obs);
+//  std::cout << last_move_feature.encoding << std::endl;
+//
+//  auto res = GetPlayedCardsPerRankByPlayer(obs);
+//  std::cout << res << std::endl;
+  DouzeroEncoder encoder;
+  auto features = encoder.Encode(obs);
+
+  for (const auto &kv : features) {
+    std::cout << kv.first << ":\n";
+    std::cout << "Encoding: " << kv.second.encoding << "\n";
+    std::cout << "Dims: " << kv.second.dims << "\n";
+  }
+
   return 0;
 }

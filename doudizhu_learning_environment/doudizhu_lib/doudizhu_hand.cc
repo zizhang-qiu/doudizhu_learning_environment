@@ -28,7 +28,7 @@ void DoudizhuHand::RemoveFromHand(int rank) {
   --num_cards_;
 }
 
-void DoudizhuHand::RemoveFromHand(int rank, std::array<uint8_t, kNumRanks> &played_cards_per_rank) {
+void DoudizhuHand::RemoveFromHand(int rank, std::array<int, kNumRanks> &played_cards_per_rank) {
   RemoveFromHand(rank);
   ++(played_cards_per_rank)[rank];
 }

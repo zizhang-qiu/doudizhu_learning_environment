@@ -6,6 +6,7 @@
 namespace doudizhu_learning_env {
 
 int PlayerToOffset(int pid, int observer_pid) {
+  if (pid == kInvalidPlayer) { return pid; }
   const int direct_offset = pid - observer_pid;
   return direct_offset < 0 ? direct_offset + kNumPlayers : direct_offset;
 }
@@ -27,7 +28,7 @@ void ChangeHistoryItemToObserverRelative(const int observer_player,
 DoudizhuObservation::DoudizhuObservation(const DoudizhuState &state, int observing_player)
     : cur_player_offset_(PlayerToOffset(state.CurrentPlayer(), observing_player)),
       observing_player_(observing_player),
-      dizhu_(state.Dizhu()),
+      dizhu_(PlayerToOffset(state.Dizhu(), observing_player)),
       cards_left_over_(state.CardsLeftOver()),
       current_phase_(state.CurrentPhase()),
       winning_bid_(state.WinningBid()),
@@ -51,6 +52,17 @@ DoudizhuObservation::DoudizhuObservation(const DoudizhuState &state, int observi
       default:FatalError("Should not reach here.");
     }
   }
+
+  for (int rank = 0; rank < kNumRanks; ++rank) {
+    const int num_my_cards_this_rank = hands_[0].CardsPerRank()[rank];
+    const int num_played_cards_this_rank = state.PlayedCardsPerRank()[rank];
+    if (rank < kBlackJoker) {
+      cards_left_per_rank_[rank] = kNumSuits - (num_my_cards_this_rank + num_played_cards_this_rank);
+    } else {
+      // One card for each joker.
+      cards_left_per_rank_[rank] = 1 - (num_my_cards_this_rank + num_played_cards_this_rank);
+    }
+  }
 }
 std::string DoudizhuObservation::ToString() const {
   std::string rv{};
@@ -62,14 +74,14 @@ std::string DoudizhuObservation::ToString() const {
       rv += auction_move.ToString() + "\n";
     }
   }
-  if (dizhu_ != -1){
+  if (dizhu_ != -1) {
     rv += "dizhu: " + std::to_string(dizhu_);
     rv += "\n";
   }
   if (!play_history_.empty()) {
     rv += "Three dizhu cards: ";
     for (const auto &card : cards_left_over_) {
-      rv += card.ToString();
+      rv += card.ToString() + " ";
     }
     rv += "\n";
 
@@ -81,7 +93,7 @@ std::string DoudizhuObservation::ToString() const {
   // Show how many cards left.
   rv += "Number of cards held by players:\n";
   for (int offset = 0; offset < kNumPlayers; ++offset) {
-    rv += "Player " + std::to_string((observing_player_ + offset) % kNumPlayers) + ": "
+    rv += "Player " + std::to_string(offset) + ": "
         + std::to_string(hands_[offset].Size()) + "\n";
   }
   return rv;

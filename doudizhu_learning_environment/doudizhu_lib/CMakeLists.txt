@@ -18,6 +18,9 @@ add_library(doudizhu utils.h
         doudizhu_history_item.h
         doudizhu_observation.cc
         doudizhu_observation.h
+        observation_encoder.h
+        douzero_encoder.cc
+        douzero_encoder.h
 )
 
 target_include_directories(doudizhu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

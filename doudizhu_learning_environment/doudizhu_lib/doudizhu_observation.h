@@ -8,6 +8,8 @@
 namespace doudizhu_learning_env {
 int PlayerToOffset(int pid, int observer_pid);
 
+// An observation class from a player's point of view.
+// All the items are relative from observing player.
 class DoudizhuObservation {
  public:
   DoudizhuObservation(const DoudizhuState &state, int observing_player);
@@ -23,6 +25,8 @@ class DoudizhuObservation {
   const std::vector<DoudizhuHand> &Hands() const { return hands_; }
   const std::vector<DoudizhuHistoryItem> &AuctionHistory() const { return auction_history_; }
   const std::vector<DoudizhuHistoryItem> &PlayHistory() const { return play_history_; }
+  std::array<int, kNumRanks> CardsLeftPerRank() const { return cards_left_per_rank_; }
+  const std::vector<DoudizhuMove> &LegalMoves() const { return legal_moves_; }
   std::string ToString() const;
   bool operator==(const DoudizhuObservation &other_obs) const { return ToString() == other_obs.ToString(); }
  private:
@@ -37,6 +41,7 @@ class DoudizhuObservation {
   // hands_[0] contains observing player's hand.
   std::vector<DoudizhuHand> hands_;
   std::vector<DoudizhuMove> legal_moves_;
+  std::array<int, kNumRanks> cards_left_per_rank_{};
   std::vector<DoudizhuHistoryItem> auction_history_;
   std::vector<DoudizhuHistoryItem> play_history_;
 };
