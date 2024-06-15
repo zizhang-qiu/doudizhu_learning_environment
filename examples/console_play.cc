@@ -52,8 +52,17 @@ void PlayGame(const std::shared_ptr<dle::DoudizhuGame> &game,
 
 int main(int argc, char **argv) {
   std::mt19937 rng;
+  int game_seed = -1;
+  while (game_seed == -1) {
+    game_seed = static_cast<int>(std::random_device()());
+  }
   rng.seed(std::random_device()());
-  PlayGame(dle::default_game, 0, &rng);
+  const dle::GameParameters params = {
+      {"seed", std::to_string(game_seed)}
+  };
+  const auto game = std::make_shared<dle::DoudizhuGame>(params);
+  std::cout << "Created game with seed=" << game_seed << std::endl;
+  PlayGame(game, 0, &rng);
 
   return 0;
 }
