@@ -62,12 +62,17 @@ std::string DoudizhuObservation::ToString() const {
       rv += auction_move.ToString() + "\n";
     }
   }
+  if (dizhu_ != -1){
+    rv += "dizhu: " + std::to_string(dizhu_);
+    rv += "\n";
+  }
   if (!play_history_.empty()) {
     rv += "Three dizhu cards: ";
     for (const auto &card : cards_left_over_) {
       rv += card.ToString();
     }
     rv += "\n";
+
     rv += "Play history:\n";
     for (const auto &play_move : play_history_) {
       rv += play_move.ToString() + "\n";
