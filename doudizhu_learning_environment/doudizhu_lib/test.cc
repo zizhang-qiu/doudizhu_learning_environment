@@ -80,23 +80,23 @@ std::ostream &operator<<(std::ostream &stream, const DoudizhuMove::PlayType play
 
 int main() {
 //  TrioComb trio_comb{kSolo, 0};
-  DoudizhuState state{default_game};
-  while (state.IsChanceNode()) {
-    state.ApplyRandomChance();
-  }
-  std::mt19937 rng;
-  rng.seed(3);
-  while (state.CurrentPhase() == Phase::kAuction) {
-    ApplyRandomMove(state, rng);
-  }
-  for (int i = 0; i <= 6; ++i) {
-    ApplyRandomMove(state, rng);
-  }
-
-  std::cout << state.ToString() << std::endl;
-  std::cout << state.CurrentPlayer() << std::endl;
-  const DoudizhuObservation obs{state};
-  std::cout << obs.ToString() << std::endl;
+//  DoudizhuState state{default_game};
+//  while (state.IsChanceNode()) {
+//    state.ApplyRandomChance();
+//  }
+//  std::mt19937 rng;
+//  rng.seed(3);
+//  while (state.CurrentPhase() == Phase::kAuction) {
+//    ApplyRandomMove(state, rng);
+//  }
+//  for (int i = 0; i <= 6; ++i) {
+//    ApplyRandomMove(state, rng);
+//  }
+//
+//  std::cout << state.ToString() << std::endl;
+//  std::cout << state.CurrentPlayer() << std::endl;
+//  const DoudizhuObservation obs{state};
+//  std::cout << obs.ToString() << std::endl;
 //
 //  const auto hand_feature = EncodeMyHand(obs);
 //  std::cout << hand_feature.encoding << std::endl;
@@ -109,14 +109,14 @@ int main() {
 //
 //  auto res = GetPlayedCardsPerRankByPlayer(obs);
 //  std::cout << res << std::endl;
-  DouzeroEncoder encoder;
-  auto features = encoder.Encode(obs);
-
-  for (const auto &kv : features) {
-    std::cout << kv.first << ":\n";
-    std::cout << "Encoding: " << kv.second.encoding << "\n";
-    std::cout << "Dims: " << kv.second.dims << "\n";
-  }
+//  DouzeroEncoder encoder;
+//  auto features = encoder.Encode(obs);
+//
+//  for (const auto &kv : features) {
+//    std::cout << kv.first << ":\n";
+//    std::cout << "Encoding: " << kv.second.encoding << "\n";
+//    std::cout << "Dims: " << kv.second.dims << "\n";
+//  }
 
   return 0;
 }

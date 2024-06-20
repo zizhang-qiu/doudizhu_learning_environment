@@ -27,7 +27,7 @@ std::vector<int> EncodeCards(const std::array<int, kNumRanks> &cards_per_rank) {
       continue;
     }
     for (int i = 0; i < num_cards_this_rank; ++i) {
-      encoding[rank + kNumCardsPerSuit * i] = 1;
+      encoding[rank * kNumSuits + i] = 1;
     }
   }
   return encoding;
@@ -65,7 +65,13 @@ Feature EncodeLastMove(const DoudizhuObservation &obs) {
         /*dims=*/{kHandFeatureSize,},
         /*desc=*/"Feature for last move played."};
   }
-  const auto last_move = obs.PlayHistory().back();
+  DoudizhuMove last_move;
+  last_move = obs.PlayHistory().back().move;
+  if (last_move.GetPlayType() == DoudizhuMove::PlayType::kPass) {
+    if (obs.PlayHistory().size() >= 2) {
+      last_move = obs.PlayHistory()[obs.PlayHistory().size() - 2].move;
+    }
+  }
   const auto encoding = EncodeMove(last_move);
   return {/*encoding=*/encoding,
       /*dims=*/{kMoveFeatureSize,},
@@ -89,22 +95,6 @@ Feature EncodeNumBombs(const DoudizhuObservation &obs) {
   std::vector<int> encoding(kNumBombsFeatureSize, 0);
   encoding[num_bombs_played] = 1;
   return {/*encoding=*/encoding, /*dims=*/{kNumBombsFeatureSize,}, /*desc=*/"Feature of number of bombs played."};
-}
-
-template<typename T>
-std::vector<T> GetLastKElements(const std::vector<T> &vec, size_t k) {
-  size_t n = vec.size();
-  std::vector<T> result;
-
-  size_t fill_count = (n < k) ? k - n : 0;
-
-  result.insert(result.end(), fill_count, T());
-
-  for (size_t i = (n > k ? n - k : 0); i < n; ++i) {
-    result.push_back(vec[i]);
-  }
-
-  return result;
 }
 
 Feature EncodeRecentMoves(const DoudizhuObservation &obs, int num_moves) {
@@ -144,7 +134,7 @@ Feature EncodeLegalMoves(const DoudizhuObservation &obs) {
 Feature EncodeRecentDizhuMove(const DoudizhuObservation &obs) {
   const auto &play_history = obs.PlayHistory();
   const auto it = std::find_if(play_history.rbegin(), play_history.rend(), [&](const DoudizhuHistoryItem &item) {
-    return item.player == PlayerToOffset(obs.ObservingPlayer(), obs.Dizhu());
+    return item.player == obs.Dizhu();
   });
   if (it != play_history.rend()) {
     const auto encoding = EncodeMove(*it);
@@ -156,8 +146,8 @@ Feature EncodeRecentDizhuMove(const DoudizhuObservation &obs) {
 Feature EncodeRecentAnotherFarmerMove(const DoudizhuObservation &obs) {
   const auto &play_history = obs.PlayHistory();
   const auto it = std::find_if(play_history.rbegin(), play_history.rend(), [&](const DoudizhuHistoryItem &item) {
-    return item.player != PlayerToOffset(obs.ObservingPlayer(), obs.Dizhu())
-        && item.player != obs.ObservingPlayer();
+    return item.player != obs.Dizhu()
+        && item.player != 0;
   });
   if (it != play_history.rend()) {
     const auto encoding = EncodeMove(*it);
@@ -183,6 +173,15 @@ Features DouzeroEncoder::Encode(const DoudizhuObservation &obs) {
 
   // The most recent move.
   const auto most_recent_move_feature = EncodeLastMove(obs);
+  features.insert({"most_recent_move", most_recent_move_feature});
+
+  // One-hot vector representing the number bombs in the current state.
+  const auto num_bombs_feature = EncodeNumBombs(obs);
+  features.insert({"num_bombs", num_bombs_feature});
+
+  // Concatenated matrix of the most recent 15 moves.
+  const auto recent_moves_feature = EncodeRecentMoves(obs, /*num_moves=*/15);
+  features.insert({"recent_moves", recent_moves_feature});
 
   const bool is_dizhu = obs.Dizhu() == 0;
   if (is_dizhu) {
@@ -201,6 +200,7 @@ Features DouzeroEncoder::Encode(const DoudizhuObservation &obs) {
     // One-hot vector representing the number cards left of the second farmer.
     const auto second_farmer_num_cards_left_feature = EncodePlayerNumCardsLeft(obs, /*relative_player=*/2);
     features.insert({"second_farmer_num_cards_left", second_farmer_num_cards_left_feature});
+
   } else {
     // Card matrix of the most recent move performed by the dizhu.
     const auto dizhu_most_recent_move_feature = EncodeRecentDizhuMove(obs);
@@ -228,14 +228,6 @@ Features DouzeroEncoder::Encode(const DoudizhuObservation &obs) {
     const auto another_farmer_num_cards_left_feature = EncodePlayerNumCardsLeft(obs, another_farmer_relative);
     features.insert({"another_farmer_num_cards_left", another_farmer_num_cards_left_feature});
   }
-
-  // One-hot vector representing the number bombs in the current state.
-  const auto num_bombs_feature = EncodeNumBombs(obs);
-  features.insert({"num_bombs", num_bombs_feature});
-
-  // Concatenated matrix of the most recent 15 moves.
-  const auto recent_moves_feature = EncodeRecentMoves(obs, /*num_moves=*/15);
-  features.insert({"recent_moves", recent_moves_feature});
 
   return features;
 }

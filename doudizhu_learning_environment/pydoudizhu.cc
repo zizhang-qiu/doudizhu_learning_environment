@@ -6,6 +6,8 @@
 #include "pybind11/stl.h"
 #include "doudizhu_state.h"
 #include "doudizhu_observation.h"
+#include "observation_encoder.h"
+#include "douzero_encoder.h"
 
 namespace py = pybind11;
 
@@ -437,6 +439,8 @@ PYBIND11_MODULE(pydoudizhu, m) {
           }
       ));
 
+  m.attr("default_game") = default_game;
+
   py::enum_<Phase>(m, "Phase")
       .value("DEAL", Phase::kDeal)
       .value("AUCTION", Phase::kAuction)
@@ -488,6 +492,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
       .def(py::init<const DoudizhuState &>(), py::arg("state"))
       .def("observing_player", &DoudizhuObservation::ObservingPlayer)
       .def("cur_player_offset", &DoudizhuObservation::CurPlayerOffset)
+      .def("legal_moves", &DoudizhuObservation::LegalMoves)
       .def("dizhu", &DoudizhuObservation::Dizhu)
       .def("cards_left_over", &DoudizhuObservation::CardsLeftOver)
       .def("current_phase", &DoudizhuObservation::CurrentPhase)
@@ -499,5 +504,15 @@ PYBIND11_MODULE(pydoudizhu, m) {
       .def("__repr__", &DoudizhuObservation::ToString)
       .def("__eq__", &DoudizhuObservation::operator==);
 
+  py::class_<Feature>(m, "Feature")
+      .def_readonly("encoding", &Feature::encoding)
+      .def_readonly("dims", &Feature::dims)
+      .def_readonly("desc", &Feature::desc);
+
+  py::class_<ObservationEncoder>(m, "ObservationEncoder");
+
+  py::class_<DouzeroEncoder, ObservationEncoder>(m, "DouzeroEncoder")
+      .def(py::init<>())
+      .def("encode", &DouzeroEncoder::Encode);
 }
 }
