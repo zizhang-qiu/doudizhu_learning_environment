@@ -28,6 +28,3 @@ target_include_directories(doudizhu PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(doudizhu_test doudizhu_test.cc)
 target_link_libraries(doudizhu_test doudizhu)
-
-add_executable(test test.cc)
-target_link_libraries(test doudizhu)
