@@ -157,7 +157,7 @@ Feature EncodeRecentAnotherFarmerMove(const DoudizhuObservation &obs) {
                        "Feature of the most recent dizhu move"};
 }
 
-Features DouzeroEncoder::Encode(const DoudizhuObservation &obs) {
+Features DouzeroEncoder::Encode(const DoudizhuObservation &obs) const {
   Features features{};
   // Moves.
   const auto moves_feature = EncodeLegalMoves(obs);

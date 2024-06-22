@@ -31,7 +31,7 @@ class DouzeroEncoder : public ObservationEncoder {
 
  public:
   ~DouzeroEncoder() override = default;
-  Features Encode(const DoudizhuObservation &obs) override;
+  Features Encode(const DoudizhuObservation &obs) const override;
 };
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUZERO_ENCODER_H_

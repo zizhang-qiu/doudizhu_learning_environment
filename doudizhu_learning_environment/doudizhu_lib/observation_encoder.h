@@ -18,7 +18,7 @@ class ObservationEncoder {
  public:
   virtual ~ObservationEncoder() = default;
 
-  virtual Features Encode(const DoudizhuObservation &obs) = 0;
+  virtual Features Encode(const DoudizhuObservation &obs) const = 0;
 };
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_OBSERVATION_ENCODER_H_
