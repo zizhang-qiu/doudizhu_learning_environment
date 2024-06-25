@@ -3,7 +3,7 @@
 //
 
 #include "doudizhu_move.h"
-#include <algorithm>
+
 namespace doudizhu_learning_env {
 std::pair<int, int> MinAndMaxChainLength(const ChainType chain_type) {
   switch (chain_type) {

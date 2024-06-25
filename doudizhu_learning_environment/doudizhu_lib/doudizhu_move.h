@@ -5,6 +5,7 @@
 #ifndef DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_MOVE_H_
 #define DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_MOVE_H_
 #include "doudizhu_hand.h"
+#include <algorithm>
 namespace doudizhu_learning_env {
 
 // Solo, pair, trio and bomb.
