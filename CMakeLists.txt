@@ -4,7 +4,7 @@ project(doudizhu_learning_environment)
 set(CMAKE_CXX_STANDARD 17)
 #set(Python_EXECUTABLE "D:\\Anaconda\\envs\\doudizhu\\python.exe")
 
-if (not WIN32)
+if (LINUX)
     set(CMAKE_CXX_FLAGS
             "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -Wno-register -fPIC -march=native -Wfatal-errors")
 
