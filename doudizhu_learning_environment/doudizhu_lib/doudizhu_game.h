@@ -6,6 +6,7 @@
 #define DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_GAME_H_
 #include <utility>
 #include <random>
+#include <memory>
 
 #include "doudizhu_move.h"
 #include "utils.h"

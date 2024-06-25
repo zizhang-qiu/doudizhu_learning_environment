@@ -9,6 +9,8 @@
 #include <sstream>
 #include <optional>
 #include <random>
+#include <algorithm>
+#include <memory>
 
 namespace doudizhu_learning_env {
 
