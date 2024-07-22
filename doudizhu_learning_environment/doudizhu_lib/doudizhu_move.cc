@@ -3,6 +3,7 @@
 //
 
 #include "doudizhu_move.h"
+#include <numeric>
 
 namespace doudizhu_learning_env {
 std::pair<int, int> MinAndMaxChainLength(const ChainType chain_type) {
@@ -227,8 +228,10 @@ std::vector<int> DoudizhuMove::ToRanks() const {
     for (int i = 0; i < kTrioLength; ++i) {
       ranks.push_back(trio_comb_.trio_rank);
     }
-    for (const int k : kickers_) {
-      ranks.push_back(k);
+    for (int rank = 0; rank < kNumRanks; ++rank) {
+      for (int i = 0; i < kickers_[rank]; ++i) {
+        ranks.push_back(rank);
+      }
     }
     return ranks;
   }
@@ -251,8 +254,10 @@ std::vector<int> DoudizhuMove::ToRanks() const {
         ranks.push_back(rank);
       }
     }
-    for (const int k : kickers_) {
-      ranks.push_back(k);
+    for (int rank = 0; rank < kNumRanks; ++rank) {
+      for (int i = 0; i < kickers_[rank]; ++i) {
+        ranks.push_back(rank);
+      }
     }
     return ranks;
   }
@@ -261,8 +266,10 @@ std::vector<int> DoudizhuMove::ToRanks() const {
     for (int i = 0; i < kQuadLength; ++i) {
       ranks.push_back(quad_comb_.quad_rank);
     }
-    for (const int k : kickers_) {
-      ranks.push_back(k);
+    for (int rank = 0; rank < kNumRanks; ++rank) {
+      for (int i = 0; i < kickers_[rank]; ++i) {
+        ranks.push_back(rank);
+      }
     }
     return ranks;
   }
@@ -273,6 +280,7 @@ std::vector<int> DoudizhuMove::ToRanks() const {
     FatalError("Should not reach here.");
   }
 }
+
 bool DoudizhuMove::IsValid(bool check_kickers) const {
   if (move_type_ == kInvalid) {
     return false;
@@ -302,22 +310,29 @@ bool DoudizhuMove::IsValid(bool check_kickers) const {
              single_rank_.rank >= 0 && single_rank_.rank < kNumCardsPerSuit;
     case PlayType::kTrioWithSolo:
     case PlayType::kTrioWithPair: {
-      bool is_valid =
-          trio_comb_.trio_rank >= 0 &&
-          trio_comb_.trio_rank < kNumCardsPerSuit &&
-          trio_comb_.kicker_type != kUnknown &&
-          kickers_.size() == static_cast<int>(trio_comb_.kicker_type);
+      const int kickers_count =
+          std::accumulate(kickers_.begin(), kickers_.end(), 0);
+      bool is_valid = trio_comb_.trio_rank >= 0 &&
+                      trio_comb_.trio_rank < kNumCardsPerSuit &&
+                      trio_comb_.kicker_type != kUnknown &&
+                      kickers_count == static_cast<int>(trio_comb_.kicker_type);
       if (check_kickers) {
-        bool is_kickers_valid = true;
         if (trio_comb_.kicker_type == kSolo) {
-          is_kickers_valid &= kickers_[0] != trio_comb_.trio_rank;
-        } else {
-          is_kickers_valid &= !KickersContainBR(kickers_);
-          for (const int k : kickers_) {
-            is_kickers_valid &= k != trio_comb_.trio_rank;
+          return kickers_[trio_comb_.trio_rank] == 0;
+        }
+        if (KickersContainBR(kickers_)) {
+          return false;
+        }
+        bool has_pair = false;
+        for (int rank = 0; rank < kNumRanks; ++rank) {
+          if (kickers_[rank] == kPairLength) {
+            has_pair = true;
+          }
+          if (kickers_[rank] != 0 && kickers_[rank] != kPairLength) {
+            return false;
           }
         }
-        is_valid &= is_kickers_valid;
+        return has_pair;
       }
       return is_valid;
     }
@@ -332,15 +347,19 @@ bool DoudizhuMove::IsValid(bool check_kickers) const {
              chain_.start_rank + chain_.length - 1 < kNumCardsPerSuit - 1;
     }
     case PlayType::kPlaneWithSolo: {
-      bool is_valid = plane_.length >= kPlaneWithSoloMinLength &&
-                      plane_.length <= kPlaneWithSoloMaxLength &&
-                      kickers_.size() != kUnknown &&
-                      kickers_.size() ==
-                          static_cast<int>(plane_.kicker_type) * plane_.length;
+      const int kickers_count =
+          std::accumulate(kickers_.begin(), kickers_.end(), 0);
+      bool is_valid =
+          plane_.length >= kPlaneWithSoloMinLength &&
+          plane_.length <= kPlaneWithSoloMaxLength &&
+          plane_.kicker_type == kSolo &&
+          kickers_count == static_cast<int>(plane_.kicker_type) * plane_.length;
       if (check_kickers) {
         // No rank in plane.
-        for (const int k : kickers_) {
-          is_valid &= !IsRankInPlane(plane_, k);
+        for (int rank=0; rank<kNumRanks; ++rank) {
+          if (kickers_[rank] > 0){
+            is_valid &= !IsRankInPlane(plane_, rank);
+          }
         }
         // BR.
         is_valid &= !KickersContainBR(kickers_);
@@ -359,15 +378,19 @@ bool DoudizhuMove::IsValid(bool check_kickers) const {
       return is_valid;
     }
     case PlayType::kPlaneWithPair: {
+      const int kickers_count =
+          std::accumulate(kickers_.begin(), kickers_.end(), 0);
       bool is_valid =
           plane_.length >= kPlaneWithSoloMinLength &&
           plane_.length <= kPlaneWithSoloMaxLength &&
           plane_.kicker_type == kPair &&
-          kickers_.size() == static_cast<int>(kPair) * plane_.length;
+          kickers_count == static_cast<int>(kPair) * plane_.length;
       if (check_kickers) {
         // No rank in plane.
-        for (const int k : kickers_) {
-          is_valid &= !IsRankInPlane(plane_, k);
+        for (int rank=0; rank<kNumRanks; ++rank) {
+          if (kickers_[rank] > 0){
+            is_valid &= !IsRankInPlane(plane_, rank);
+          }
         }
         const auto counter = kickers_;
         for (int rank = 0; rank < kNumRanks; ++rank) {
@@ -382,14 +405,18 @@ bool DoudizhuMove::IsValid(bool check_kickers) const {
       return is_valid;
     }
     case PlayType::kQuadWithSolo: {
+      const int kickers_count =
+          std::accumulate(kickers_.begin(), kickers_.end(), 0);
       bool is_valid = quad_comb_.quad_rank >= 0 &&
                       quad_comb_.quad_rank < kNumCardsPerSuit &&
-                      quad_comb_.kicker_type != kUnknown &&
-                      kickers_.size() == 2;
+                      quad_comb_.kicker_type == kSolo &&
+                      kickers_count == 2;
       if (check_kickers) {
         // No same rank as quad.
-        for (const int k : kickers_) {
-          is_valid &= k != quad_comb_.quad_rank;
+        for (int rank=0; rank<kNumRanks; ++rank) {
+          if (kickers_[rank] > 0){
+            is_valid &= rank != quad_comb_.quad_rank;
+          }
         }
         // No BR in kickers.
         is_valid &= !KickersContainBR(kickers_);
@@ -397,14 +424,18 @@ bool DoudizhuMove::IsValid(bool check_kickers) const {
       return is_valid;
     }
     case PlayType::kQuadWithPair: {
+      const int kickers_count =
+          std::accumulate(kickers_.begin(), kickers_.end(), 0);
       bool is_valid = quad_comb_.quad_rank >= 0 &&
                       quad_comb_.quad_rank < kNumCardsPerSuit &&
-                      quad_comb_.kicker_type != kUnknown &&
+                      quad_comb_.kicker_type == kPair &&
                       kickers_.size() == 2 * kPairLength;
       if (check_kickers) {
         // No same rank as quad.
-        for (const int k : kickers_) {
-          is_valid &= k != quad_comb_.quad_rank;
+        for (int rank=0; rank<kNumRanks; ++rank) {
+          if (kickers_[rank] > 0){
+            is_valid &= rank != quad_comb_.quad_rank;
+          }
         }
         // No BR in kickers.
         is_valid &= !KickersContainBR(kickers_);
