@@ -133,7 +133,7 @@ class DoudizhuMove {
                TrioComb trio_comb,
                QuadComb quad_comb,
                Plane plane,
-               const std::vector<int> &kickers)
+               const std::array<int, kNumRanks> &kickers)
       : move_type_(move_type),
         auction_type_(auction_type),
         play_type_(play_type),
@@ -164,7 +164,7 @@ class DoudizhuMove {
                TrioComb trio_comb,
                QuadComb quad_comb,
                Plane plane,
-               const std::vector<int> &kickers)
+               const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         play_type_(play_type),
         single_rank_(single_rank),
@@ -208,7 +208,7 @@ class DoudizhuMove {
 
   // Fast constructor for trio combs.
   DoudizhuMove(TrioComb trio_comb,
-               const std::vector<int> &kickers)
+               const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         trio_comb_(trio_comb),
         kickers_(kickers) {
@@ -223,7 +223,7 @@ class DoudizhuMove {
 
   // Fast constructor for quad combs.
   DoudizhuMove(QuadComb quad_comb,
-               const std::vector<int> &kickers)
+               const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         quad_comb_(quad_comb),
         kickers_(kickers) {
@@ -238,7 +238,7 @@ class DoudizhuMove {
 
   // Fast constructor for planes.
   DoudizhuMove(Plane plane,
-               const std::vector<int> &kickers)
+               const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         plane_(plane),
         kickers_(kickers) {
@@ -280,9 +280,9 @@ class DoudizhuMove {
 
   QuadComb GetQuadComb() const { return quad_comb_; }
 
-  Plane GetPlane() const { return plane_; }
+  auto Plane() const -> Plane { return plane_; }
 
-  std::vector<int> Kickers() const { return kickers_; }
+  const std::array<int, kNumRanks> &Kickers() const { return kickers_; }
 
   bool IsBomb() const { return play_type_ == PlayType::kBomb || play_type_ == PlayType::kRocket; }
 
@@ -310,13 +310,15 @@ class DoudizhuMove {
   Chain chain_{};
   TrioComb trio_comb_{};
   QuadComb quad_comb_{};
-  Plane plane_{};
-  std::vector<int> kickers_{};
+  struct Plane plane_{};
+  std::array<int, kNumRanks> kickers_{};
 };
 
 std::ostream &operator<<(std::ostream &os, const DoudizhuMove &move);
 
 bool HandCanMakeMove(const DoudizhuHand &hand, const DoudizhuMove &move);
+
+std::array<int, kNumRanks> RanksToCounter(const std::vector<int> &kickers);
 
 DoudizhuMove GetChainMoveFromString(const std::string &move_str, int num_ranks,
                                     ChainType chain_type);

@@ -2,7 +2,6 @@
 // Created by qzz on 2024/5/31.
 //
 #include <iostream>
-#include <fstream>
 #include <filesystem>
 #include "doudizhu_game.h"
 #include "doudizhu_state.h"
@@ -168,7 +167,7 @@ void MoveTest() {
           /*trio_comb=*/{kSolo, rank},
           /*quad_comb=*/{},
           /*plane=*/{},
-          /*kickers=*/{kicker}
+          /*kickers=*/RanksToCounter({kicker})
       };
       std::string expected{"(Play "};
       for (int i = 0; i < kTrioLength; ++i) {
@@ -194,7 +193,7 @@ void MoveTest() {
           /*trio_comb=*/{kPair, rank},
           /*quad_comb=*/{},
           /*plane=*/{},
-          /*kickers=*/{kicker, kicker}
+          /*kickers=*/RanksToCounter({kicker, kicker})
       };
       std::string expected{"(Play "};
       for (int i = 0; i < kTrioLength; ++i) {
@@ -292,7 +291,7 @@ void MoveTest() {
             /*trio_comb=*/{},
             /*quad_comb=*/{},
             /*plane=*/plane,
-            /*kickers=*/kickers
+            /*kickers=*/RanksToCounter(kickers)
         };
         ++num_plane_with_solo;
 
@@ -329,7 +328,7 @@ void MoveTest() {
             /*trio_comb=*/{},
             /*quad_comb=*/{},
             /*plane=*/plane,
-            /*kickers=*/kickers
+            /*kickers=*/RanksToCounter(kickers)
         };
         ++num_plane_with_pair;
 
@@ -364,7 +363,7 @@ void MoveTest() {
           /*trio_comb=*/{},
           /*quad_comb=*/quad_comb,
           /*plane=*/{},
-          /*kickers=*/ks
+          /*kickers=*/RanksToCounter(ks)
       };
       ++num_quad_with_solo;
       std::string expected{"(Play "};
@@ -395,7 +394,7 @@ void MoveTest() {
           /*trio_comb=*/{},
           /*quad_comb=*/quad_comb,
           /*plane=*/{},
-          /*kickers=*/ks
+          /*kickers=*/RanksToCounter(ks)
       };
       ++num_quad_with_pair;
       std::string expected{"(Play "};

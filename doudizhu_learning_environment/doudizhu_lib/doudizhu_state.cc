@@ -266,11 +266,14 @@ bool DoudizhuState::PlayIsLegal(const DoudizhuMove &move) const {
     case DoudizhuMove::PlayType::kPlaneWithSolo:
     case DoudizhuMove::PlayType::kPlaneWithPair: {
       // A plane should have same kicker type and length with previous one.
-      if (move.GetPlane().kicker_type != current_trick_winning_move.GetPlane().kicker_type
-          || move.GetPlane().length != current_trick_winning_move.GetPlane().length) {
+      if (move.Plane().kicker_type !=
+              current_trick_winning_move.Plane().kicker_type
+          ||
+          move.Plane().length != current_trick_winning_move.Plane().length) {
         return false;
       }
-      return move.GetPlane().start_rank > current_trick_winning_move.GetPlane().start_rank;
+      return move.Plane().start_rank >
+             current_trick_winning_move.Plane().start_rank;
     }
     case DoudizhuMove::PlayType::kQuadWithSolo:
     case DoudizhuMove::PlayType::kQuadWithPair: {

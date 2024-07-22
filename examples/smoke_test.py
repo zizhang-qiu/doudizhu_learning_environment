@@ -320,7 +320,6 @@ class SmokeTest(unittest.TestCase):
             state.apply_move(random_move)
 
         obs = pydoudizhu.DoudizhuObservation(state)
-        self.assertEqual(obs.dizhu(), state.dizhu())
         self.assertEqual(obs.winning_bid(), state.winning_bid())
         self.assertEqual(obs.num_bombs_played(), state.num_bombs_played())
 

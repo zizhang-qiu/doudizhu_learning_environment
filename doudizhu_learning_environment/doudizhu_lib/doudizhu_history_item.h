@@ -29,7 +29,7 @@ struct DoudizhuHistoryItem {
   TrioComb trio_comb;
   QuadComb quad_comb;
   Plane plane;
-  std::vector<int> kickers;
+  std::array<int, kNumRanks> kickers;
 };
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_HISTORY_ITEM_H_

@@ -27,7 +27,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
           /*trio_comb=*/trio_comb,
           /*quad_comb=*/{},
           /*plane=*/{},
-          /*kickers=*/ks
+          /*kickers=*/RanksToCounter(ks)
       };
       trio_with_solos_.push_back(move);
     }
@@ -45,7 +45,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
           /*trio_comb=*/trio_comb,
           /*quad_comb=*/{},
           /*plane=*/{},
-          /*kickers=*/ks
+          /*kickers=*/RanksToCounter(ks)
       };
       trio_with_pairs_.push_back(move);
     }
@@ -65,7 +65,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
             /*trio_comb=*/{},
             /*quad_comb=*/{},
             /*plane=*/plane,
-            /*kickers=*/ks
+            /*kickers=*/RanksToCounter(ks)
         };
         plane_with_solo_per_length_[length].push_back(move);
       }
@@ -84,7 +84,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
             /*trio_comb=*/{},
             /*quad_comb=*/{},
             /*plane=*/plane,
-            /*kickers=*/ks
+            /*kickers=*/RanksToCounter(ks)
         };
         plane_with_pair_per_length_[length].push_back(move);
       }
@@ -103,7 +103,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
           /*trio_comb=*/{},
           /*quad_comb=*/quad_comb,
           /*plane=*/{},
-          /*kickers=*/ks
+          /*kickers=*/RanksToCounter(ks)
       };
       quad_with_solos_.push_back(move);
     }
@@ -121,7 +121,7 @@ DoudizhuGame::DoudizhuGame(const GameParameters &parameters) {
           /*trio_comb=*/{},
           /*quad_comb=*/quad_comb,
           /*plane=*/{},
-          /*kickers=*/ks
+          /*kickers=*/RanksToCounter(ks)
       };
       quad_with_pairs_.push_back(move);
     }
@@ -488,7 +488,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
       }
       uid_base += kNumChainOfTrios;
       if (play_type == DoudizhuMove::PlayType::kPlaneWithSolo) {
-        const Plane plane = move.GetPlane();
+        const Plane plane = move.Plane();
         const auto get_index = [&](const int length) {
           return static_cast<int>(
               std::find(plane_with_solo_per_length_.at(length).begin(),
@@ -518,7 +518,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
       uid_base += kNumPlaneWithSolos;
 
       if (play_type == DoudizhuMove::PlayType::kPlaneWithPair) {
-        const Plane plane = move.GetPlane();
+        const Plane plane = move.Plane();
         const auto get_index = [&](const int length) {
           return static_cast<int>(
               std::find(plane_with_pair_per_length_.at(length).begin(),
