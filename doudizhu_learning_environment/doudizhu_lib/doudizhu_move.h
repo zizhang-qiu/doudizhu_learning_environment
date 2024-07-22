@@ -280,7 +280,7 @@ class DoudizhuMove {
 
   QuadComb GetQuadComb() const { return quad_comb_; }
 
-  auto Plane() const -> Plane { return plane_; }
+  Plane GetPlane() const { return plane_; }
 
   const std::array<int, kNumRanks> &Kickers() const { return kickers_; }
 
@@ -310,7 +310,7 @@ class DoudizhuMove {
   Chain chain_{};
   TrioComb trio_comb_{};
   QuadComb quad_comb_{};
-  struct Plane plane_{};
+  Plane plane_{};
   std::array<int, kNumRanks> kickers_{};
 };
 

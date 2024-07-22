@@ -488,7 +488,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
       }
       uid_base += kNumChainOfTrios;
       if (play_type == DoudizhuMove::PlayType::kPlaneWithSolo) {
-        const Plane plane = move.Plane();
+        const Plane plane = move.GetPlane();
         const auto get_index = [&](const int length) {
           return static_cast<int>(
               std::find(plane_with_solo_per_length_.at(length).begin(),
@@ -518,7 +518,7 @@ int DoudizhuGame::GetMoveUid(const DoudizhuMove &move) const {
       uid_base += kNumPlaneWithSolos;
 
       if (play_type == DoudizhuMove::PlayType::kPlaneWithPair) {
-        const Plane plane = move.Plane();
+        const Plane plane = move.GetPlane();
         const auto get_index = [&](const int length) {
           return static_cast<int>(
               std::find(plane_with_pair_per_length_.at(length).begin(),
