@@ -1,15 +1,14 @@
 //
 // Created by qzz on 2024/6/14.
 //
-#include <iostream>
-#include "doudizhu_state.h"
 #include "doudizhu_observation.h"
+#include "doudizhu_state.h"
+#include <iostream>
 
 namespace dle = doudizhu_learning_env;
 
 void PlayGame(const std::shared_ptr<dle::DoudizhuGame> &game,
-              int player_position,
-              std::mt19937 *rng) {
+              int player_position, std::mt19937 *rng) {
   dle::DoudizhuState state(game);
   while (!state.IsTerminal()) {
     // Chance node.
@@ -39,10 +38,19 @@ void PlayGame(const std::shared_ptr<dle::DoudizhuGame> &game,
     std::cout << "Please enter your move.\n";
     std::string move_str;
     std::cin >> move_str;
-    const auto move = dle::GetMoveFromString(move_str,
-                                             state.CurrentPhase() == dle::Phase::kAuction
-                                             ? doudizhu_learning_env::DoudizhuMove::kAuction
-                                             : doudizhu_learning_env::DoudizhuMove::kPlay);
+    dle::DoudizhuMove move;
+    while (true) {
+      move = dle::GetMoveFromString(
+          move_str, state.CurrentPhase() == dle::Phase::kAuction
+                        ? doudizhu_learning_env::DoudizhuMove::kAuction
+                        : doudizhu_learning_env::DoudizhuMove::kPlay);
+      if (move.IsValid()) {
+        break;
+      }
+      std::cout
+          << "The string cannot be converted to a move, please input again:\n";
+      std::cin >> move_str;
+    }
     std::cout << "The move you choose is " << move.ToString() << std::endl;
     state.ApplyMove(move);
   }
@@ -57,9 +65,7 @@ int main(int argc, char **argv) {
     game_seed = static_cast<int>(std::random_device()());
   }
   rng.seed(std::random_device()());
-  const dle::GameParameters params = {
-      {"seed", std::to_string(game_seed)}
-  };
+  const dle::GameParameters params = {{"seed", std::to_string(game_seed)}};
   const auto game = std::make_shared<dle::DoudizhuGame>(params);
   std::cout << "Created game with seed=" << game_seed << std::endl;
   PlayGame(game, 0, &rng);
