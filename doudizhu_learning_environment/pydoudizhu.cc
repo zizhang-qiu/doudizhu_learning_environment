@@ -285,7 +285,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
       .def("get_chain", &DoudizhuMove::GetChain)
       .def("get_trio_comb", &DoudizhuMove::GetTrioComb)
       .def("get_quad_comb", &DoudizhuMove::GetQuadComb)
-      .def("get_plane", &DoudizhuMove::Plane)
+      .def("get_plane", &DoudizhuMove::GetPlane)
       .def("kickers", &DoudizhuMove::Kickers)
       .def("is_bomb", &DoudizhuMove::IsBomb)
       .def("is_valid", &DoudizhuMove::IsValid, py::arg("check_kickers") = false)
@@ -299,7 +299,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
                                   move.GetPlayType(), move.DealCard(),
                                   move.GetSingleRank(), move.GetChain(),
                                   move.GetTrioComb(), move.GetQuadComb(),
-                                  move.Plane(), move.Kickers());
+                                  move.GetPlane(), move.Kickers());
           },
           [](const py::tuple &t) {
             //__setstate__
@@ -399,7 +399,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
               item.chain = move.GetChain();
               item.trio_comb = move.GetTrioComb();
               item.quad_comb = move.GetQuadComb();
-              item.plane = move.Plane();
+              item.plane = move.GetPlane();
               item.kickers = move.Kickers();
               break;
             default:

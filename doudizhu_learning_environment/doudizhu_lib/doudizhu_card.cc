@@ -53,9 +53,11 @@ int CardIndex(int rank, Suit suit) {
 }
 
 int CardIndex(const DoudizhuCard &card) {
-  if (!card.IsValid()) { return -1; }
+  if (!card.IsValid()) {
+    return -1;
+  }
   return CardIndex(card.CardRank(), card.CardSuit());
 }
 
-}
 
+} // namespace doudizhu_learning_env

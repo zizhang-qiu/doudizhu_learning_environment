@@ -147,5 +147,16 @@ int FindNonContinuousNumber(const std::vector<int> &nums) {
 
   throw std::runtime_error("No non-continuous number found.");
 }
+bool HasKElemEqualWithTarget(const std::vector<int> &nums, int k, int target) {
+  std::unordered_map<int, int> m{};
+  for (const int num : nums) {
+    ++m[num - target];
+
+    if (m[0] >= k) {
+      return true;
+    }
+  }
+  return false;
+}
 
 }  // namespace doudizhu_learning_env
