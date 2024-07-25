@@ -586,11 +586,12 @@ void SearchForQuadCombMoves(const DoudizhuHand &current_hand,
       // Not enough cards.
       return;
     }
-    std::vector<int> kickers;
+
     for (int rank = rival_move.GetQuadComb().quad_rank + 1;
          rank < kNumCardsPerSuit; ++rank) {
       if (cards_per_rank[rank] == kQuadLength) {
         // Able to make a quad with solo move.
+        std::vector<int> kickers;
         for (int r = 0; r < kNumRanks; ++r) {
           if (r == rank) {
             continue;
@@ -654,7 +655,9 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
                        std::vector<DoudizhuMove> &moves) {
   CHECK_TRUE(rival_move.GetPlayType() == DoudizhuMove::PlayType::kInvalid ||
              rival_move.GetPlayType() == DoudizhuMove::PlayType::kPass);
+//  std::cout << current_hand.ToString() << std::endl;
   // Single rank.
+//  std::cout << "single rank" << std::endl;
   for (int num_cards = 1; num_cards <= kQuadLength; ++num_cards) {
     SearchForSingleRankMoves(
         current_hand,
@@ -662,11 +665,13 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
         moves);
   }
   // Trio combs.
+//  std::cout << "trio with solo" << std::endl;
   SearchForTrioCombMoves(
       current_hand,
       DoudizhuMove{/*trio_comb=*/TrioComb{/*kt=*/kSolo, /*tr=*/-1},
                    std::array<int, kNumRanks>()},
       moves);
+//  std::cout << "trio with pair" << std::endl;
   SearchForTrioCombMoves(
       current_hand,
       DoudizhuMove{/*trio_comb=*/TrioComb{/*kt=*/kPair, /*tr=*/-1},
@@ -674,6 +679,7 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
       moves);
   // Chain moves.
   // Chain of solo.
+//  std::cout << "chain of solo" << std::endl;
   for (int chain_length = kChainOfSoloMinLength;
        chain_length <= kChainOfSoloMaxLength; ++chain_length) {
     SearchForChainMoves(current_hand,
@@ -683,6 +689,7 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
                         moves);
   }
   // Chain of pair.
+//  std::cout << "chain of pair" << std::endl;
   for (int chain_length = kChainOfPairMinLength;
        chain_length <= kChainOfPairMaxLength; ++chain_length) {
     SearchForChainMoves(current_hand,
@@ -692,6 +699,7 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
                         moves);
   }
   // Chain of trio.
+//  std::cout << "chain of trio" << std::endl;
   for (int chain_length = kChainOfTrioMinLength;
        chain_length <= kChainOfTrioMaxLength; ++chain_length) {
     SearchForChainMoves(current_hand,
@@ -702,6 +710,7 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
   }
 
   // Plane.
+//  std::cout << "plane with solo" << std::endl;
   for (int plane_length = kPlaneWithSoloMinLength;
        plane_length <= kPlaneWithSoloMaxLength; ++plane_length) {
     SearchForPlaneMoves(
@@ -711,6 +720,7 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
             std::array<int, kNumRanks>()},
         moves);
   }
+//  std::cout << "chain of pair" << std::endl;
   for (int plane_length = kPlaneWithPairMinLength;
        plane_length <= kPlaneWithPairMaxLength; ++plane_length) {
     SearchForPlaneMoves(
@@ -722,16 +732,19 @@ void SearchForAllMoves(const DoudizhuHand &current_hand,
   }
 
   // Quad Comb.
+//  std::cout << "quad with solo" << std::endl;
   SearchForQuadCombMoves(
       current_hand,
       DoudizhuMove{/*quad_comb=*/QuadComb{/*kt=*/kSolo, /*qr=*/-1},
                    std::array<int, kNumRanks>()},
       moves);
+//  std::cout << "quad with pair" << std::endl;
   SearchForQuadCombMoves(
       current_hand,
       DoudizhuMove{/*quad_comb=*/QuadComb{/*kt=*/kPair, /*qr=*/-1},
                    std::array<int, kNumRanks>()},
       moves);
+//  std::cout << "leave" << std::endl;
 }
 
 std::vector<DoudizhuMove> DoudizhuState::LegalMoves(int player) const {
@@ -893,8 +906,10 @@ std::vector<DoudizhuHand> DoudizhuState::OriginalDeal() const {
   for (int i = 0; i < kNumCards - kNumCardsLeftOver; ++i) {
     rv[i % kNumPlayers].AddCard(move_history_[i].deal_card);
   }
-  for (const auto &card : cards_left_over_) {
-    rv[dizhu_].AddCard(card);
+  if (dizhu_ != -1){
+    for (const auto &card : cards_left_over_) {
+      rv[dizhu_].AddCard(card);
+    }
   }
   return rv;
 }

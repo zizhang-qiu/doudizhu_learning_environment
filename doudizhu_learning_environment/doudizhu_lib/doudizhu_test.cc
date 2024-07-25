@@ -570,17 +570,10 @@ void RandomSimTest(bool verbose, int seed, int num_games = 100) {
 }
 
 int main() {
-  //  CardTest();
-  //  MoveTest();
-  //  GameTest();
-  //    MoveFromStringTest();
-  RandomSimTest(false, 42, 100);
-  //  DoudizhuMove move{
-  //      /*chain=*/Chain{/*chain_type=*/doudizhu_learning_env::ChainType::kPair,
-  //                      /*length=*/3, /*start_rank=*/0}};
-  //  std::cout << move << std::endl;
-  //  auto move2 = GetMoveFromString("QQQKKKAAA222",
-  //  doudizhu_learning_env::DoudizhuMove::kPlay); std::cout << move2 <<
-  //  std::endl;
+  CardTest();
+  MoveTest();
+  GameTest();
+  MoveFromStringTest();
+  RandomSimTest(false, 1, 1000);
   return 0;
 }
