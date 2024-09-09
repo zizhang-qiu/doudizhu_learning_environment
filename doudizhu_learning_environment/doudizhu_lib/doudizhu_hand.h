@@ -17,7 +17,7 @@ class DoudizhuHand {
 
   bool operator==(const DoudizhuHand &other_hand) const { return cards_per_rank_ == other_hand.cards_per_rank_; }
 
-  std::string ToString() const;
+  [[nodiscard]] std::string ToString() const;
 
   void AddCard(const DoudizhuCard &card);
 
@@ -29,7 +29,7 @@ class DoudizhuHand {
 
   int Size() const { return num_cards_; }
 
-  std::array<int, kNumRanks> CardsPerRank() const { return cards_per_rank_; }
+  const std::array<int, kNumRanks>& CardsPerRank() const { return cards_per_rank_; }
 
   bool CanAdd(int rank) const;
 

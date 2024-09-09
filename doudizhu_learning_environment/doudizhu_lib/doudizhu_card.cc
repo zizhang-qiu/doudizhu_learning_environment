@@ -17,7 +17,7 @@ std::string DoudizhuCard::ToString() const {
     return "BJ";
   }
 
-  return {kSuitChar[suit_], kRankChar[rank_]};
+  return {kSuitChar[static_cast<int>(suit_)], kRankChar[rank_]};
 }
 
 bool DoudizhuCard::operator==(const DoudizhuCard &other_card) const {
@@ -37,9 +37,9 @@ int Uid2Rank(int card_uid) {
 }
 Suit Uid2Suit(int card_uid) {
   if (card_uid >= kNumNormalCards) {
-    return kInvalidSuit;
+    return Suit::kInvalidSuit;
   }
-  return Suit(card_uid % kNumSuits);
+  return static_cast<Suit>(card_uid % kNumSuits);
 }
 
 int CardIndex(int rank, Suit suit) {
@@ -49,7 +49,7 @@ int CardIndex(int rank, Suit suit) {
   if (rank == kRedJoker) {
     return kNumCards - 1;
   }
-  return rank * kNumSuits + suit;
+  return rank * kNumSuits + static_cast<int>(suit);
 }
 
 int CardIndex(const DoudizhuCard &card) {

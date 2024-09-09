@@ -885,18 +885,18 @@ DoudizhuMove GetDealMoveFromString(std::string_view move_str) {
   if (move_str.length() == 1) {
     if (std::toupper(move_str[0]) == 'R') {
       return DoudizhuMove{/*deal_card=*/DoudizhuCard{/*rank=*/kRedJoker,
-                                                     /*suit=*/kInvalidSuit}};
+                                                     /*suit=*/Suit::kInvalidSuit}};
     }
     if (std::toupper(move_str[0]) == 'B') {
       return DoudizhuMove{/*deal_card=*/DoudizhuCard{/*rank=*/kBlackJoker,
-                                                     /*suit=*/kInvalidSuit}};
+                                                     /*suit=*/Suit::kInvalidSuit}};
     }
     return {};
   }
   if (move_str.length() == 2) {
     Suit suit = SuitCharToSuit(move_str[0]);
     int rank = RankCharToRank(move_str[1]);
-    if (suit == kInvalidSuit || rank == -1) {
+    if (suit == Suit::kInvalidSuit || rank == -1) {
       return {};
     }
     return DoudizhuMove{

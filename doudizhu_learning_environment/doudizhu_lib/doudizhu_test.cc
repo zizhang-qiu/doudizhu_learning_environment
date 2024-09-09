@@ -21,8 +21,8 @@ void CardTest() {
   }
 
   // 2Jokers
-  const DoudizhuCard black_joker{kBlackJoker, kInvalidSuit};
-  const DoudizhuCard red_joker{kRedJoker, kInvalidSuit};
+  const DoudizhuCard black_joker{kBlackJoker, Suit::kInvalidSuit};
+  const DoudizhuCard red_joker{kRedJoker, Suit::kInvalidSuit};
   CHECK_TRUE(black_joker.IsValid());
   CHECK_TRUE(black_joker.IsJoker());
   CHECK_TRUE(red_joker.IsValid());
@@ -57,7 +57,7 @@ void MoveTest() {
     for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
       const DoudizhuMove move(DoudizhuCard{rank, suit});
       std::string expected = "(Deal ";
-      expected.push_back(kSuitChar[suit]);
+      expected.push_back(kSuitChar[static_cast<int>(suit)]);
       expected.push_back(kRankChar[rank]);
       expected.push_back(')');
       //      std::cout << move.ToString() << std::endl;
@@ -66,9 +66,9 @@ void MoveTest() {
   }
 
   {
-    DoudizhuMove deal_red_joker(DoudizhuCard{kRedJoker, kInvalidSuit});
+    DoudizhuMove deal_red_joker(DoudizhuCard{kRedJoker, Suit::kInvalidSuit});
     CHECK_EQ(deal_red_joker.ToString(), "(Deal RJ)");
-    DoudizhuMove deal_black_joker(DoudizhuCard{kBlackJoker, kInvalidSuit});
+    DoudizhuMove deal_black_joker(DoudizhuCard{kBlackJoker, Suit::kInvalidSuit});
     CHECK_EQ(deal_black_joker.ToString(), "(Deal BJ)");
   }
 

@@ -8,25 +8,28 @@
 
 #include "doudizhu_utils.h"
 #include "utils.h"
-namespace doudizhu_learning_env {
 
-constexpr std::array<Suit, kNumSuits> kAllSuits = {kClubsSuit, kDiamondsSuit,
-                                                   kHeartsSuit, kSpadesSuit};
+namespace doudizhu_learning_env {
+constexpr std::array<Suit, kNumSuits> kAllSuits = {
+  Suit::kClubsSuit, Suit::kDiamondsSuit,
+  Suit::kHeartsSuit, Suit::kSpadesSuit
+};
 
 class DoudizhuCard {
-public:
-  DoudizhuCard() = default; // Create an invalid card.
-  constexpr DoudizhuCard(int rank, Suit suit) : rank_(rank), suit_(suit) {}
-  bool operator==(const DoudizhuCard &other_card) const;
-  bool IsValid() const { return (rank_ >= 0); }
-  bool IsJoker() const { return rank_ == kBlackJoker || rank_ == kRedJoker; }
-  std::string ToString() const;
-  int CardRank() const { return rank_; }
-  Suit CardSuit() const { return suit_; }
+  public:
+    DoudizhuCard() = default; // Create an invalid card.
+    constexpr DoudizhuCard(const int rank, const Suit suit) : rank_(rank), suit_(suit) {
+    }
+    bool operator==(const DoudizhuCard &other_card) const;
+    bool IsValid() const { return (rank_ >= 0); }
+    bool IsJoker() const { return rank_ == kBlackJoker || rank_ == kRedJoker; }
+    std::string ToString() const;
+    int CardRank() const { return rank_; }
+    Suit CardSuit() const { return suit_; }
 
-private:
-  int rank_ = -1;
-  Suit suit_ = kInvalidSuit;
+  private:
+    int rank_ = -1;
+    Suit suit_ = Suit::kInvalidSuit;
 };
 
 int Uid2Rank(int card_uid);
@@ -38,11 +41,13 @@ constexpr std::array<DoudizhuCard, kNumCards> AllCards() {
   std::array<DoudizhuCard, kNumCards> all_cards{};
   for (int index = 0; index < kNumCards; ++index) {
     const Suit suit =
-        index >= kNumNormalCards ? kInvalidSuit : Suit(index % kNumSuits);
+        index >= kNumNormalCards ? Suit::kInvalidSuit : static_cast<Suit>(index % kNumSuits);
     const int rank = index >= kNumNormalCards
-                         ? index - kNumNormalCards + kBlackJoker
-                         : index / kNumSuits;
-    all_cards[index] = DoudizhuCard{/*rank=*/rank, /*suit=*/suit};
+                       ? index - kNumNormalCards + kBlackJoker
+                       : index / kNumSuits;
+    all_cards[index] = DoudizhuCard{
+      /*rank=*/rank, /*suit=*/suit
+    };
   }
   return all_cards;
 }

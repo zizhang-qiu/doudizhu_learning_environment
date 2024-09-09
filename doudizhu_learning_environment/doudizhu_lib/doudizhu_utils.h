@@ -37,12 +37,12 @@ inline constexpr int kNumRanks = kNumCardsPerSuit + 2;
 inline constexpr int kNumCardsLeftOver = 3;
 inline constexpr int kChainAndPlaneMaxRank = 11; // Ace.
 
-constexpr int NumberOfChainOrPlane(int length) {
+constexpr int NumberOfChainOrPlane(const int length) {
   return kChainAndPlaneMaxRank - length + 1 - 0 + 1;
 }
 
 
-enum Suit {
+enum class Suit {
   kInvalidSuit = -1,
   kClubsSuit = 0,
   kDiamondsSuit,

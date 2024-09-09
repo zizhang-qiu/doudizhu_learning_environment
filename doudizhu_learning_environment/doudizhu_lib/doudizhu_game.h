@@ -42,9 +42,9 @@ public:
 
   GameParameters Parameters() const { return parameters_; }
 
-  DoudizhuMove GetMove(int uid) const { return moves_[uid]; }
+  DoudizhuMove GetMove(const int uid) const { return moves_[uid]; }
 
-  DoudizhuMove GetChanceOutcome(int uid) const { return chance_outcomes_[uid]; }
+  DoudizhuMove GetChanceOutcome(const int uid) const { return chance_outcomes_[uid]; }
 
   int GetMoveUid(const DoudizhuMove &move) const;
 
@@ -54,7 +54,7 @@ public:
       const std::pair<std::vector<DoudizhuMove>, std::vector<double>>
           &chance_outcomes) const;
 
-  bool operator==(const DoudizhuGame &other_game) {
+  bool operator==(const DoudizhuGame &other_game) const {
     return parameters_ == other_game.parameters_;
   }
 
