@@ -29,20 +29,20 @@ bool DoudizhuCard::operator==(const DoudizhuCard &other_card) const {
   return true;
 }
 
-int Uid2Rank(int card_uid) {
+int Uid2Rank(const int card_uid) {
   if (card_uid >= kNumNormalCards) {
     return card_uid - kNumNormalCards + kBlackJoker;
   }
   return card_uid / kNumSuits;
 }
-Suit Uid2Suit(int card_uid) {
+Suit Uid2Suit(const int card_uid) {
   if (card_uid >= kNumNormalCards) {
     return Suit::kInvalidSuit;
   }
   return static_cast<Suit>(card_uid % kNumSuits);
 }
 
-int CardIndex(int rank, Suit suit) {
+int CardIndex(const int rank, Suit suit) {
   if (rank == kBlackJoker) {
     return kNumCards - 2;
   }

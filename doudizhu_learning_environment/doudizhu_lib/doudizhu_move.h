@@ -31,7 +31,7 @@ struct Chain {
   ChainType chain_type{ChainType::kNotChain};
   int length{};
   int start_rank{};
-  Chain(ChainType chain_type, int length, int start_rank) :
+  Chain(const ChainType chain_type, const int length, const int start_rank) :
       chain_type(chain_type), length(length), start_rank(start_rank) {}
 
   Chain() = default;
@@ -48,7 +48,7 @@ enum KickerType { kUnknown = -1, kSolo = 1, kPair };
 struct TrioComb {
   KickerType kicker_type{kUnknown};
   int trio_rank{};
-  TrioComb(KickerType kt, int tr) : kicker_type(kt), trio_rank(tr) {}
+  TrioComb(const KickerType kt, const int tr) : kicker_type(kt), trio_rank(tr) {}
   TrioComb() = default;
   bool operator==(const TrioComb &other) const {
     return kicker_type == other.kicker_type
@@ -60,7 +60,7 @@ struct TrioComb {
 struct QuadComb {
   KickerType kicker_type{kUnknown};
   int quad_rank{};
-  QuadComb(KickerType kt, int qr) : kicker_type(kt), quad_rank(qr) {}
+  QuadComb(const KickerType kt, const int qr) : kicker_type(kt), quad_rank(qr) {}
   QuadComb() = default;
   bool operator==(const QuadComb &other) const {
     return kicker_type == other.kicker_type
@@ -77,7 +77,7 @@ struct Plane {
   KickerType kicker_type{kUnknown};
   int length{};
   int start_rank{};
-  Plane(KickerType kt, int l, int sr) : kicker_type(kt), length(l), start_rank(sr) {}
+  Plane(const KickerType kt, const int l, const int sr) : kicker_type(kt), length(l), start_rank(sr) {}
   Plane() = default;
   bool operator==(const Plane &other) const {
     return kicker_type == other.kicker_type
@@ -124,15 +124,15 @@ class DoudizhuMove {
     kRocket
   };
 
-  DoudizhuMove(Type move_type,
-               AuctionType auction_type,
-               PlayType play_type,
+  DoudizhuMove(const Type move_type,
+               const AuctionType auction_type,
+               const PlayType play_type,
                const DoudizhuCard &deal_card,
-               SingleRank single_rank,
-               Chain chain,
-               TrioComb trio_comb,
-               QuadComb quad_comb,
-               Plane plane,
+               const SingleRank single_rank,
+               const Chain chain,
+               const TrioComb trio_comb,
+               const QuadComb quad_comb,
+               const Plane plane,
                const std::array<int, kNumRanks> &kickers)
       : move_type_(move_type),
         auction_type_(auction_type),
@@ -158,12 +158,12 @@ class DoudizhuMove {
       auction_type_(auction_type) {}
 
   // Fast constructor for a play move.
-  DoudizhuMove(PlayType play_type,
-               SingleRank single_rank,
-               Chain chain,
-               TrioComb trio_comb,
-               QuadComb quad_comb,
-               Plane plane,
+  DoudizhuMove(const PlayType play_type,
+               const SingleRank single_rank,
+               const Chain chain,
+               const TrioComb trio_comb,
+               const QuadComb quad_comb,
+               const Plane plane,
                const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         play_type_(play_type),
@@ -175,7 +175,7 @@ class DoudizhuMove {
         kickers_(kickers) {}
 
   // Fast constructor for single ranks.
-  explicit DoudizhuMove(SingleRank single_rank)
+  explicit DoudizhuMove(const SingleRank single_rank)
       : move_type_(kPlay),
         single_rank_(single_rank) {
     switch (single_rank_.num_cards) {
@@ -192,7 +192,7 @@ class DoudizhuMove {
   }
 
   // Fast constructor for chains.
-  explicit DoudizhuMove(Chain chain)
+  explicit DoudizhuMove(const Chain chain)
       : move_type_(kPlay),
         chain_(chain) {
     switch (chain_.chain_type) {
@@ -207,7 +207,7 @@ class DoudizhuMove {
   }
 
   // Fast constructor for trio combs.
-  DoudizhuMove(TrioComb trio_comb,
+  DoudizhuMove(const TrioComb trio_comb,
                const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         trio_comb_(trio_comb),
@@ -222,7 +222,7 @@ class DoudizhuMove {
   }
 
   // Fast constructor for quad combs.
-  DoudizhuMove(QuadComb quad_comb,
+  DoudizhuMove(const QuadComb quad_comb,
                const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         quad_comb_(quad_comb),
@@ -237,7 +237,7 @@ class DoudizhuMove {
   }
 
   // Fast constructor for planes.
-  DoudizhuMove(Plane plane,
+  DoudizhuMove(const Plane plane,
                const std::array<int, kNumRanks> &kickers)
       : move_type_(kPlay),
         plane_(plane),
@@ -252,7 +252,7 @@ class DoudizhuMove {
   }
 
   // Fast constructor for rockets and pass.
-  explicit DoudizhuMove(PlayType play_type)
+  explicit DoudizhuMove(const PlayType play_type)
       : move_type_(kPlay) {
     CHECK_TRUE(play_type == PlayType::kRocket || play_type == PlayType::kPass);
     play_type_ = play_type;
@@ -260,33 +260,33 @@ class DoudizhuMove {
 
   DoudizhuMove(const DoudizhuMove &) = default;
 
-  std::string ToString() const;
+  [[nodiscard]] std::string ToString() const;
 
   bool operator==(const DoudizhuMove &other_move) const;
 
-  Type MoveType() const { return move_type_; }
+  [[nodiscard]] Type MoveType() const { return move_type_; }
 
-  DoudizhuCard DealCard() const { return deal_card_; }
+  [[nodiscard]] DoudizhuCard DealCard() const { return deal_card_; }
 
-  AuctionType Auction() const { return auction_type_; }
+  [[nodiscard]] AuctionType Auction() const { return auction_type_; }
 
-  PlayType GetPlayType() const { return play_type_; }
+  [[nodiscard]] PlayType GetPlayType() const { return play_type_; }
 
-  SingleRank GetSingleRank() const { return single_rank_; }
+  [[nodiscard]] SingleRank GetSingleRank() const { return single_rank_; }
 
-  Chain GetChain() const { return chain_; }
+  [[nodiscard]] Chain GetChain() const { return chain_; }
 
-  TrioComb GetTrioComb() const { return trio_comb_; }
+  [[nodiscard]] TrioComb GetTrioComb() const { return trio_comb_; }
 
-  QuadComb GetQuadComb() const { return quad_comb_; }
+  [[nodiscard]] QuadComb GetQuadComb() const { return quad_comb_; }
 
-  Plane GetPlane() const { return plane_; }
+  [[nodiscard]] Plane GetPlane() const { return plane_; }
 
-  const std::array<int, kNumRanks> &Kickers() const { return kickers_; }
+  [[nodiscard]] const std::array<int, kNumRanks> &Kickers() const { return kickers_; }
 
-  bool IsBomb() const { return play_type_ == PlayType::kBomb || play_type_ == PlayType::kRocket; }
+  [[nodiscard]] bool IsBomb() const { return play_type_ == PlayType::kBomb || play_type_ == PlayType::kRocket; }
 
-  int BombRank() const {
+  [[nodiscard]] int BombRank() const {
     CHECK_TRUE(IsBomb());
     if (play_type_ == PlayType::kRocket) {
       return kBlackJoker;
@@ -297,10 +297,10 @@ class DoudizhuMove {
     return -1;
   }
 
-  std::vector<int> ToRanks() const;
+  [[nodiscard]] std::vector<int> ToRanks() const;
 
   // Some moves created by users may be invalid, use this function to check validity.
-  bool IsValid(bool check_kickers = false) const;
+  [[nodiscard]] bool IsValid(bool check_kickers = false) const;
  private:
   Type move_type_ = kInvalid;
   enum AuctionType auction_type_ = AuctionType::kInvalid;

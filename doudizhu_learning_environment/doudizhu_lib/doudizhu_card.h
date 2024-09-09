@@ -20,6 +20,8 @@ class DoudizhuCard {
     DoudizhuCard() = default; // Create an invalid card.
     constexpr DoudizhuCard(const int rank, const Suit suit) : rank_(rank), suit_(suit) {
     }
+    constexpr DoudizhuCard(const Suit suit, const int rank): rank_(rank), suit_(suit) {
+    }
     bool operator==(const DoudizhuCard &other_card) const;
     bool IsValid() const { return (rank_ >= 0); }
     bool IsJoker() const { return rank_ == kBlackJoker || rank_ == kRedJoker; }

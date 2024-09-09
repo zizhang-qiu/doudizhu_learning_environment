@@ -15,7 +15,7 @@
 
 namespace doudizhu_learning_env {
 
-constexpr int Combination(int n, int r) {
+constexpr int Combination(const int n, const int r) {
   if (r == 0)
     return 1;
 
@@ -65,7 +65,7 @@ bool IsVectorConsecutive(const std::vector<int> &vec);
 int FindNonContinuousNumber(const std::vector<int> &nums);
 
 inline int CountUniqueElements(const std::vector<int> &vec) {
-  std::unordered_set<int> unique_elements(vec.begin(), vec.end());
+  const std::unordered_set<int> unique_elements(vec.begin(), vec.end());
   return static_cast<int>(unique_elements.size());
 }
 

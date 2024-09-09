@@ -39,6 +39,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
   py::class_<DoudizhuCard>(m, "DoudizhuCard")
       .def(py::init<>())
       .def(py::init<int, Suit>(), py::arg("rank"), py::arg("suit"))
+      .def(py::init<Suit, int>(), py::arg("suit"), py::arg("rank"))
       .def("__eq__", &DoudizhuCard::operator==)
       .def("is_valid", &DoudizhuCard::IsValid)
       .def("is_joker", &DoudizhuCard::IsJoker)
