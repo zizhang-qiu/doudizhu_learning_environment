@@ -109,7 +109,7 @@ class SmokeTest(unittest.TestCase):
             trio_comb=pydoudizhu.TrioComb(),
             quad_comb=pydoudizhu.QuadComb(),
             plane=pydoudizhu.Plane(),
-            kickers=[]
+            kickers=[0 for _ in range(15)]
         )
         self.assertEqual(repr(solo_move), "(Play 3)")
 
@@ -151,7 +151,7 @@ class SmokeTest(unittest.TestCase):
         # Trio with solo
         trio_with_solo_move = pydoudizhu.DoudizhuMove(
             pydoudizhu.TrioComb(kt=pydoudizhu.KickerType.SOLO, tr=4),
-            [0]
+            [1] + [0 for _ in range(14)]
         )
         self.assertEqual(repr(trio_with_solo_move), "(Play 7773)")
         self.assertEqual(trio_with_solo_move.get_play_type(), pydoudizhu.PlayType.TRIO_WITH_SOLO)
@@ -159,7 +159,7 @@ class SmokeTest(unittest.TestCase):
         # Trio with pair
         trio_with_pair_move = pydoudizhu.DoudizhuMove(
             pydoudizhu.TrioComb(kt=pydoudizhu.KickerType.PAIR, tr=5),
-            [1, 1]
+            [0, 2] + [0 for _ in range(13)]
         )
         self.assertEqual(repr(trio_with_pair_move), "(Play 88844)")
         self.assertEqual(trio_with_pair_move.get_play_type(), pydoudizhu.PlayType.TRIO_WITH_PAIR)
@@ -167,7 +167,7 @@ class SmokeTest(unittest.TestCase):
         # Quad with solo
         quad_with_solo_move = pydoudizhu.DoudizhuMove(
             pydoudizhu.QuadComb(kt=pydoudizhu.KickerType.SOLO, qr=2),
-            [0, 1]
+            [1, 1] + [0 for _ in range(13)]
         )
         self.assertEqual(repr(quad_with_solo_move), "(Play 555534)")
         self.assertEqual(quad_with_solo_move.get_play_type(), pydoudizhu.PlayType.QUAD_WITH_SOLO)
@@ -175,7 +175,7 @@ class SmokeTest(unittest.TestCase):
         # Quad with pair
         quad_with_pair_move = pydoudizhu.DoudizhuMove(
             pydoudizhu.QuadComb(kt=pydoudizhu.KickerType.PAIR, qr=11),
-            [9, 9, 10, 10]
+            [0 for _ in range(9)] + [2, 2] + [0 for _ in range(4)]
         )
         self.assertEqual(repr(quad_with_pair_move), "(Play AAAAQQKK)")
         self.assertEqual(quad_with_pair_move.get_play_type(), pydoudizhu.PlayType.QUAD_WITH_PAIR)
@@ -183,7 +183,7 @@ class SmokeTest(unittest.TestCase):
         # Plane with solo
         plane_with_solo_move = pydoudizhu.DoudizhuMove(
             pydoudizhu.Plane(kt=pydoudizhu.KickerType.SOLO, l=2, sr=0),
-            kickers=[2, 3]
+            kickers=[0, 0, 1, 1] + [0 for _ in range(11)]
         )
         self.assertEqual(repr(plane_with_solo_move), "(Play 33344456)")
         self.assertEqual(plane_with_solo_move.get_play_type(), pydoudizhu.PlayType.PLANE_WITH_SOLO)
@@ -191,7 +191,7 @@ class SmokeTest(unittest.TestCase):
         # Plane with solo
         plane_with_pair_move = pydoudizhu.DoudizhuMove(
             pydoudizhu.Plane(kt=pydoudizhu.KickerType.PAIR, l=3, sr=0),
-            kickers=[4, 4, 5, 5, 6, 6]
+            kickers= [0 for _ in range(4)] + [2, 2, 2] + [0 for _ in range(8)]
         )
         self.assertEqual(repr(plane_with_pair_move), "(Play 333444555778899)")
         self.assertEqual(plane_with_pair_move.get_play_type(), pydoudizhu.PlayType.PLANE_WITH_PAIR)

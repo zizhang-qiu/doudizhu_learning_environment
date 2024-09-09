@@ -418,6 +418,8 @@ PYBIND11_MODULE(pydoudizhu, m) {
       .def("max_game_length", &DoudizhuGame::MaxGameLength)
       .def("get_move", &DoudizhuGame::GetMove)
       .def("get_chance_outcome", &DoudizhuGame::GetChanceOutcome)
+      .def("get_move_uid", &DoudizhuGame::GetMoveUid)
+      .def("get_chance_outcome_uid", &DoudizhuGame::GetChanceOutcomeUid)
       .def("parameters", &DoudizhuGame::Parameters)
       .def("__eq__", &DoudizhuGame::operator==)
       .def(py::pickle(
@@ -441,6 +443,7 @@ PYBIND11_MODULE(pydoudizhu, m) {
   py::class_<DoudizhuState>(m, "DoudizhuState")
       .def(py::init<const std::shared_ptr<DoudizhuGame> &>(),
            py::arg("parent_game"))
+      .def("is_chance_node", &DoudizhuState::IsChanceNode)
       .def("is_terminal", &DoudizhuState::IsTerminal)
       .def("current_player", &DoudizhuState::CurrentPlayer)
       .def("current_phase", &DoudizhuState::CurrentPhase)
