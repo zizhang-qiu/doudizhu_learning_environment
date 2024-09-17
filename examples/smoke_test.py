@@ -109,6 +109,7 @@ class SmokeTest(unittest.TestCase):
             trio_comb=pydoudizhu.TrioComb(),
             quad_comb=pydoudizhu.QuadComb(),
             plane=pydoudizhu.Plane(),
+            space_shuttle=pydoudizhu.SpaceShuttle(),
             kickers=[0 for _ in range(15)]
         )
         self.assertEqual(repr(solo_move), "(Play 3)")

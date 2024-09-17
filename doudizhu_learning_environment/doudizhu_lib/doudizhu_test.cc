@@ -32,11 +32,12 @@ void CardTest() {
   cards.push_back(red_joker);
 
   const std::array<std::string, kNumCards> all_cards_str = {
-      "C3", "D3", "H3", "S3", "C4", "D4", "H4", "S4", "C5", "D5", "H5",
-      "S5", "C6", "D6", "H6", "S6", "C7", "D7", "H7", "S7", "C8", "D8",
-      "H8", "S8", "C9", "D9", "H9", "S9", "CT", "DT", "HT", "ST", "CJ",
-      "DJ", "HJ", "SJ", "CQ", "DQ", "HQ", "SQ", "CK", "DK", "HK", "SK",
-      "CA", "DA", "HA", "SA", "C2", "D2", "H2", "S2", "BJ", "RJ"};
+    "C3", "D3", "H3", "S3", "C4", "D4", "H4", "S4", "C5", "D5", "H5",
+    "S5", "C6", "D6", "H6", "S6", "C7", "D7", "H7", "S7", "C8", "D8",
+    "H8", "S8", "C9", "D9", "H9", "S9", "CT", "DT", "HT", "ST", "CJ",
+    "DJ", "HJ", "SJ", "CQ", "DQ", "HQ", "SQ", "CK", "DK", "HK", "SK",
+    "CA", "DA", "HA", "SA", "C2", "D2", "H2", "S2", "BJ", "RJ"
+  };
 
   for (int i = 0; i < kNumCards; ++i) {
     CHECK_EQ(cards[i].ToString(), all_cards_str[i]);
@@ -63,9 +64,7 @@ void MoveTest() {
       //      std::cout << move.ToString() << std::endl;
       CHECK_EQ(move.ToString(), expected);
     }
-  }
-
-  {
+  } {
     DoudizhuMove deal_red_joker(DoudizhuCard{kRedJoker, Suit::kInvalidSuit});
     CHECK_EQ(deal_red_joker.ToString(), "(Deal RJ)");
     DoudizhuMove deal_black_joker(DoudizhuCard{kBlackJoker, Suit::kInvalidSuit});
@@ -76,8 +75,10 @@ void MoveTest() {
   const DoudizhuMove auction_pass{DoudizhuMove::AuctionType::kPass};
   CHECK_EQ(auction_pass.ToString(), "(Bid Pass)");
   for (const auto auction_type :
-       {DoudizhuMove::AuctionType::kOne, DoudizhuMove::AuctionType::kTwo,
-        DoudizhuMove::AuctionType::kThree}) {
+       {
+         DoudizhuMove::AuctionType::kOne, DoudizhuMove::AuctionType::kTwo,
+         DoudizhuMove::AuctionType::kThree
+       }) {
     const DoudizhuMove move{auction_type};
     //    std::cout << move.ToString() <<std::endl;
     CHECK_EQ(move.ToString(),
@@ -87,13 +88,9 @@ void MoveTest() {
   // Play
   // Solo/Pair/Trio/Bomb.
   for (int rank = 0; rank < kNumCardsPerSuit; ++rank) {
-    const DoudizhuMove solo_move{/*play_type=*/DoudizhuMove::PlayType::kSolo,
-                                 /*single_rank=*/{rank, 1},
-                                 /*chain=*/{},
-                                 /*trio_comb=*/{},
-                                 /*quad_comb=*/{},
-                                 /*plane=*/{},
-                                 /*kickers=*/{}};
+    const DoudizhuMove solo_move{
+      /*single_rank=*/{rank, 1},
+    };
 
     std::string expected_solo_str = "(Play ";
     expected_solo_str.push_back(kRankChar[rank]);
@@ -101,26 +98,18 @@ void MoveTest() {
     //    std::cout << solo_move.ToString() << std::endl;
     CHECK_EQ(solo_move.ToString(), expected_solo_str);
 
-    const DoudizhuMove pair_move{/*play_type=*/DoudizhuMove::PlayType::kPair,
-                                 /*single_rank=*/{rank, 2},
-                                 /*chain=*/{},
-                                 /*trio_comb=*/{},
-                                 /*quad_comb=*/{},
-                                 /*plane=*/{},
-                                 /*kickers=*/{}};
+    const DoudizhuMove pair_move{
+      /*single_rank=*/{rank, 2},
+    };
     std::string expected_pair_str = "(Play ";
     expected_pair_str.push_back(kRankChar[rank]);
     expected_pair_str.push_back(kRankChar[rank]);
     expected_pair_str.push_back(')');
     CHECK_EQ(pair_move.ToString(), expected_pair_str);
 
-    const DoudizhuMove trio_move{/*play_type=*/DoudizhuMove::PlayType::kTrio,
-                                 /*single_rank=*/{rank, 3},
-                                 /*chain=*/{},
-                                 /*trio_comb=*/{},
-                                 /*quad_comb=*/{},
-                                 /*plane=*/{},
-                                 /*kickers=*/{}};
+    const DoudizhuMove trio_move{
+      /*single_rank=*/{rank, 3},
+    };
     std::string expected_trio_str = "(Play ";
     expected_trio_str.push_back(kRankChar[rank]);
     expected_trio_str.push_back(kRankChar[rank]);
@@ -128,13 +117,9 @@ void MoveTest() {
     expected_trio_str.push_back(')');
     CHECK_EQ(trio_move.ToString(), expected_trio_str);
 
-    const DoudizhuMove bomb_move{/*play_type=*/DoudizhuMove::PlayType::kBomb,
-                                 /*single_rank=*/{rank, 4},
-                                 /*chain=*/{},
-                                 /*trio_comb=*/{},
-                                 /*quad_comb=*/{},
-                                 /*plane=*/{},
-                                 /*kickers=*/{}};
+    const DoudizhuMove bomb_move{
+      /*single_rank=*/{rank, 4}
+    };
     std::string expected_bomb_str = "(Play ";
     expected_bomb_str.push_back(kRankChar[rank]);
     expected_bomb_str.push_back(kRankChar[rank]);
@@ -151,13 +136,9 @@ void MoveTest() {
         continue;
       }
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kTrioWithSolo,
-          /*single_rank=*/{},
-          /*chain=*/{},
-          /*trio_comb=*/{kSolo, rank},
-          /*quad_comb=*/{},
-          /*plane=*/{},
-          /*kickers=*/RanksToCounter({kicker})};
+        /*trio_comb=*/TrioComb{kSolo, rank},
+        /*kickers=*/RanksToCounter({kicker})
+      };
       std::string expected{"(Play "};
       for (int i = 0; i < kTrioLength; ++i) {
         expected.push_back(kRankChar[rank]);
@@ -176,13 +157,9 @@ void MoveTest() {
         continue;
       }
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kTrioWithPair,
-          /*single_rank=*/{},
-          /*chain=*/{},
-          /*trio_comb=*/{kPair, rank},
-          /*quad_comb=*/{},
-          /*plane=*/{},
-          /*kickers=*/RanksToCounter({kicker, kicker})};
+        /*trio_comb=*/TrioComb{kPair, rank},
+        /*kickers=*/RanksToCounter({kicker, kicker})
+      };
       std::string expected{"(Play "};
       for (int i = 0; i < kTrioLength; ++i) {
         expected.push_back(kRankChar[rank]);
@@ -200,14 +177,9 @@ void MoveTest() {
        ++length) {
     for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kChainOfSolo,
-          /*single_rank=*/{},
-          /*chain=*/
-          {doudizhu_learning_env::ChainType::kSolo, length, start_rank},
-          /*trio_comb=*/{},
-          /*quad_comb=*/{},
-          /*plane=*/{},
-          /*kickers=*/{}};
+        /*chain=*/
+        {doudizhu_learning_env::ChainType::kSolo, length, start_rank},
+      };
       std::string expected{"(Play "};
       for (int i = 0; i < length; ++i) {
         expected.push_back(kRankChar[start_rank + i]);
@@ -223,14 +195,9 @@ void MoveTest() {
        ++length) {
     for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kChainOfPair,
-          /*single_rank=*/{},
-          /*chain=*/
-          {doudizhu_learning_env::ChainType::kPair, length, start_rank},
-          /*trio_comb=*/{},
-          /*quad_comb=*/{},
-          /*plane=*/{},
-          /*kickers=*/{}};
+        /*chain=*/
+        {doudizhu_learning_env::ChainType::kPair, length, start_rank},
+      };
       std::string expected{"(Play "};
       for (int i = 0; i < length; ++i) {
         expected.push_back(kRankChar[start_rank + i]);
@@ -247,14 +214,9 @@ void MoveTest() {
        ++length) {
     for (int start_rank = 0; start_rank <= 11 - length + 1; ++start_rank) {
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kChainOfTrio,
-          /*single_rank=*/{},
-          /*chain=*/
-          {doudizhu_learning_env::ChainType::kTrio, length, start_rank},
-          /*trio_comb=*/{},
-          /*quad_comb=*/{},
-          /*plane=*/{},
-          /*kickers=*/{}};
+        /*chain=*/
+        {doudizhu_learning_env::ChainType::kTrio, length, start_rank}
+      };
       std::string expected{"(Play "};
       for (int i = 0; i < length; ++i) {
         expected.push_back(kRankChar[start_rank + i]);
@@ -277,13 +239,9 @@ void MoveTest() {
       const auto possible_kickers = GetPossibleKickers(plane);
       for (const auto &kickers : possible_kickers) {
         const DoudizhuMove move{
-            /*play_type=*/DoudizhuMove::PlayType::kPlaneWithSolo,
-            /*single_rank=*/{},
-            /*chain=*/{},
-            /*trio_comb=*/{},
-            /*quad_comb=*/{},
-            /*plane=*/plane,
-            /*kickers=*/RanksToCounter(kickers)};
+          /*plane=*/plane,
+          /*kickers=*/RanksToCounter(kickers)
+        };
         ++num_plane_with_solo;
 
         std::string expected{"(Play "};
@@ -314,13 +272,9 @@ void MoveTest() {
       const auto possible_kickers = GetPossibleKickers(plane);
       for (const auto &kickers : possible_kickers) {
         const DoudizhuMove move{
-            /*play_type=*/DoudizhuMove::PlayType::kPlaneWithPair,
-            /*single_rank=*/{},
-            /*chain=*/{},
-            /*trio_comb=*/{},
-            /*quad_comb=*/{},
-            /*plane=*/plane,
-            /*kickers=*/RanksToCounter(kickers)};
+          /*plane=*/plane,
+          /*kickers=*/RanksToCounter(kickers)
+        };
         ++num_plane_with_pair;
 
         std::string expected{"(Play "};
@@ -348,13 +302,9 @@ void MoveTest() {
     const auto kickers = GetPossibleKickers(quad_comb);
     for (const auto &ks : kickers) {
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kQuadWithSolo,
-          /*single_rank=*/{},
-          /*chain=*/{},
-          /*trio_comb=*/{},
-          /*quad_comb=*/quad_comb,
-          /*plane=*/{},
-          /*kickers=*/RanksToCounter(ks)};
+        /*quad_comb=*/quad_comb,
+        /*kickers=*/RanksToCounter(ks)
+      };
       ++num_quad_with_solo;
       std::string expected{"(Play "};
       for (int i = 0; i < kQuadLength; ++i) {
@@ -377,13 +327,9 @@ void MoveTest() {
     const auto kickers = GetPossibleKickers(quad_comb);
     for (const auto &ks : kickers) {
       const DoudizhuMove move{
-          /*play_type=*/DoudizhuMove::PlayType::kQuadWithPair,
-          /*single_rank=*/{},
-          /*chain=*/{},
-          /*trio_comb=*/{},
-          /*quad_comb=*/quad_comb,
-          /*plane=*/{},
-          /*kickers=*/RanksToCounter(ks)};
+        /*quad_comb=*/quad_comb,
+        /*kickers=*/RanksToCounter(ks)
+      };
       ++num_quad_with_pair;
       std::string expected{"(Play "};
       for (int i = 0; i < kQuadLength; ++i) {
@@ -401,25 +347,78 @@ void MoveTest() {
 
   // Rocket
   {
-    const DoudizhuMove move{/*play_type=*/DoudizhuMove::PlayType::kRocket,
-                            /*single_rank=*/{},
-                            /*chain=*/{},
-                            /*trio_comb=*/{},
-                            /*quad_comb=*/{},
-                            /*plane=*/{},
-                            /*kickers=*/{}};
+    const DoudizhuMove move{
+      /*play_type=*/DoudizhuMove::PlayType::kRocket
+    };
     CHECK_EQ(move.ToString(), "(Play BR)");
   }
 
+  // Space Shuttle
+  int num_space_shuttle_with_solo = 0;
+  for (int length = kSpaceShuttleMinLength;
+       length <= kSpaceShuttleWithSoloMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= kChainAndPlaneMaxRank - length + 1;
+         ++start_rank) {
+      SpaceShuttle space_shuttle{kSolo, length, start_rank};
+      const auto kickers = GetPossibleKickers(space_shuttle);
+      for (const auto &ks : kickers) {
+        const DoudizhuMove move{
+          space_shuttle,
+          RanksToCounter(ks)
+        };
+        ++num_space_shuttle_with_solo;
+        std::string expected{"(Play "};
+        for (int r = start_rank; r < start_rank + length; ++r) {
+          for (int i = 0; i < kQuadLength; ++i) {
+            expected.push_back(kRankChar[r]);
+          }
+        }
+        for (const int k : ks) {
+          expected.push_back(kRankChar[k]);
+        }
+        expected.push_back(')');
+        //      std::cout << move.ToString() << std::endl;
+        CHECK_EQ(move.ToString(), expected);
+      }
+    }
+  }
+  CHECK_EQ(num_space_shuttle_with_solo, GetNumSpaceShuttleWithSolo());
+
+  int num_space_shuttle_with_pair = 0;
+  for (int length = kSpaceShuttleMinLength;
+       length <= kSpaceShuttleWithPairMaxLength; ++length) {
+    for (int start_rank = 0; start_rank <= kChainAndPlaneMaxRank - length + 1;
+         ++start_rank) {
+      SpaceShuttle space_shuttle{kPair, length, start_rank};
+      const auto kickers = GetPossibleKickers(space_shuttle);
+      for (const auto &ks : kickers) {
+        const DoudizhuMove move{
+          space_shuttle,
+          RanksToCounter(ks)
+        };
+        ++num_space_shuttle_with_pair;
+        std::string expected{"(Play "};
+        for (int r = start_rank; r < start_rank + length; ++r) {
+          for (int i = 0; i < kQuadLength; ++i) {
+            expected.push_back(kRankChar[r]);
+          }
+        }
+        for (const int k : ks) {
+          expected.push_back(kRankChar[k]);
+        }
+        expected.push_back(')');
+        //      std::cout << move.ToString() << std::endl;
+        CHECK_EQ(move.ToString(), expected);
+      }
+    }
+  }
+  CHECK_EQ(num_space_shuttle_with_pair, GetNumSpaceShuttleWithPair());
+
   // Pass
   {
-    const DoudizhuMove move{/*play_type=*/DoudizhuMove::PlayType::kPass,
-                            /*single_rank=*/{},
-                            /*chain=*/{},
-                            /*trio_comb=*/{},
-                            /*quad_comb=*/{},
-                            /*plane=*/{},
-                            /*kickers=*/{}};
+    const DoudizhuMove move{
+      /*play_type=*/DoudizhuMove::PlayType::kPass
+    };
     CHECK_EQ(move.ToString(), "(Play Pass)");
   }
 
@@ -444,7 +443,11 @@ bool MoveStringEqual(const std::string &lhs, const std::string &rhs) {
 }
 
 void GameTest() {
-  DoudizhuGame game{{}};
+  GameParameters game_parameters{
+    {"allow_space_shuttle", "true"},
+    {"allow_repeated_kickers", "false"}
+  };
+  DoudizhuGame game{game_parameters};
   const auto &all_moves = game.AllMoves();
   CHECK_EQ(all_moves.size(), game.MaxMoves());
 
@@ -483,7 +486,7 @@ void GameTest() {
 
   // Test if GetMove() is consistent with GetMoveUid()
   for (int i = 0; i < all_moves.size(); ++i) {
-    //    std::cout << all_moves[i] << std::endl;
+    // std::cout << all_moves[i] << std::endl;
     const int uid = game.GetMoveUid(all_moves[i]);
     CHECK_EQ(uid, i);
   }
@@ -496,12 +499,13 @@ void MoveFromStringTest() {
   for (const auto &move : all_moves) {
     //    std::cout << move << std::endl;
     const int prefix_len =
-        move.MoveType() == doudizhu_learning_env::DoudizhuMove::kAuction ? 5
-                                                                         : 6;
+        move.MoveType() == doudizhu_learning_env::DoudizhuMove::kAuction
+          ? 5
+          : 6;
     const auto move_str = move.ToString().substr(
-        prefix_len, move.ToString().length() - prefix_len - 1);
-    const auto move_from_str = GetMoveFromString(move_str, move.MoveType());
-    if (!(move == move_from_str)) {
+      prefix_len,
+      move.ToString().length() - prefix_len - 1);
+    if (const auto move_from_str = GetMoveFromString(move_str, move.MoveType()); !(move == move_from_str)) {
       std::cout << move << ", " << move_from_str << std::endl;
     }
     //    CHECK_EQ(move, move_from_str);
@@ -523,13 +527,14 @@ void RandomSimTest(bool verbose, int seed, int num_games = 100) {
       if (state.CurrentPlayer() == kChancePlayerId) {
         auto chance_outcomes = state.ChanceOutcomes();
         std::discrete_distribution<std::mt19937::result_type> dist(
-            chance_outcomes.second.begin(), chance_outcomes.second.end());
+          chance_outcomes.second.begin(),
+          chance_outcomes.second.end());
         auto move = chance_outcomes.first[dist(rng)];
         if (verbose) {
           std::cout << "Legal chance:";
           for (int i = 0; i < chance_outcomes.first.size(); ++i) {
             std::cout << " <" << chance_outcomes.first[i].ToString() << ", "
-                      << chance_outcomes.second[i] << ">";
+                << chance_outcomes.second[i] << ">";
           }
           std::cout << "\n";
           std::cout << "Sampled move: " << move.ToString() << "\n\n";
@@ -539,14 +544,15 @@ void RandomSimTest(bool verbose, int seed, int num_games = 100) {
       }
       const auto legal_moves = state.LegalMoves();
       std::uniform_int_distribution<std::mt19937::result_type> dist(
-          0, legal_moves.size() - 1);
+        0,
+        legal_moves.size() - 1);
       auto move = legal_moves[dist(rng)];
       if (verbose) {
         std::cout << "Current player: " << state.CurrentPlayer() << "\n";
         std::cout << state.ToString() << "\n\n";
         std::cout << "Legal moves:";
-        for (int i = 0; i < legal_moves.size(); ++i) {
-          std::cout << " " << legal_moves[i].ToString();
+        for (const auto &legal_move : legal_moves) {
+          std::cout << " " << legal_move.ToString();
         }
         std::cout << "\n";
         std::cout << "Sampled move: " << move.ToString() << "\n\n";
@@ -561,19 +567,50 @@ void RandomSimTest(bool verbose, int seed, int num_games = 100) {
   auto elapsed = ed - st;
   std::cout << "Passed random sim test." << std::endl;
   std::cout << num_games << " games have been simulated, "
-            << "Avg time for a game: "
-            << double(std::chrono::duration_cast<std::chrono::milliseconds>(
-                          elapsed)
-                          .count()) /
-                   (num_games * 1000)
-            << " seconds." << std::endl;
+      << "Avg time for a game: "
+      << static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(
+          elapsed)
+        .count()) / (num_games * 1000)
+      << " seconds." << std::endl;
 }
 
 int main() {
-  CardTest();
-  MoveTest();
-  GameTest();
-  MoveFromStringTest();
-  RandomSimTest(false, 1, 1000);
+  // CardTest();
+  // MoveTest();
+  // GameTest();
+  // MoveFromStringTest();
+  // RandomSimTest(false, 1, 10000);
+  std::vector<int> deal = {
+    4, 17, 8, 34, 51, 36, 27, 19, 28, 35, 21, 49, 45, 26, 44, 3, 40, 10, 20, 11, 15, 2, 22, 52, 0, 39, 18, 16, 37, 48,
+    7, 47, 38, 25, 50, 42, 14, 5, 24, 41, 9, 32, 23, 46, 43, 6, 29, 12, 1, 31, 13, 30, 33, 53
+  };
+  std::vector<int> play = {
+    2, 0, 3, 97, 20094, 20094, 11, 20094, 14, 17, 20094, 20094, 27, 20094, 30, 31, 20094, 20094, 13, 20094, 16, 20094,
+    20094, 23, 29, 20094, 20094, 21, 24, 20094, 20094
+  };
+  GameParameters game_parameters{
+    {"allow_space_shuttle", "true"},
+    {"allow_repeated_kickers", "false"}
+  };
+  DoudizhuGame game{game_parameters};
+  for (int uid = 1300; uid < 1400; ++uid) {
+    std::cout << game.GetMove(uid) << "\n";
+  }
+  auto move = game.GetMove(1372);
+  std::cout << move.ToString() << std::endl;
+  // auto state = DoudizhuState(std::make_shared<DoudizhuGame>(game));
+  // for(const int chance_outcome_uid : deal) {
+  //   auto move = game.GetChanceOutcome(chance_outcome_uid);
+  //   state.ApplyMove(move);
+  // }
+  // for(const int move_uid : play) {
+  //   auto move = game.GetMove(move_uid);
+  //   state.ApplyMove(move);
+  // }
+  // std::cout << state.ToString() << std::endl;
+  // auto legal_moves = state.LegalMoves();
+  // for(const auto &legal_move : legal_moves) {
+  //   std::cout << legal_move.ToString() << "\n";
+  // }
   return 0;
 }

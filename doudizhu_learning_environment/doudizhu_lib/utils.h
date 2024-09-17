@@ -15,6 +15,7 @@
 
 namespace doudizhu_learning_env {
 
+// N choose R.
 constexpr int Combination(const int n, const int r) {
   if (r == 0)
     return 1;

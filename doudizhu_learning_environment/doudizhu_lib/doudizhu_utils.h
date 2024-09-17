@@ -5,8 +5,8 @@
 #ifndef DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_
 #define DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_
 #include "utils.h"
-namespace doudizhu_learning_env {
 
+namespace doudizhu_learning_env {
 inline constexpr int kInvalidPlayer = -1;
 inline constexpr int kLeftOverPlayer = -2;
 inline constexpr int kChancePlayerId = -3;
@@ -40,7 +40,6 @@ inline constexpr int kChainAndPlaneMaxRank = 11; // Ace.
 constexpr int NumberOfChainOrPlane(const int length) {
   return kChainAndPlaneMaxRank - length + 1 - 0 + 1;
 }
-
 
 enum class Suit {
   kInvalidSuit = -1,
@@ -104,32 +103,116 @@ constexpr int GetNumChainOfTrios() {
 inline constexpr int kNumChainOfSolos = GetNumChainOfSolos();
 inline constexpr int kNumChainOfPairs = GetNumChainOfPairs(); // 33~qq is the maximum length.
 inline constexpr int kNumChainOfTrios = GetNumChainOfTrios(); // 333~888 is the maximum length.
+
+constexpr int GetNumLength2PlaneWithSolo(const bool repeated_kickers) {
+  constexpr int num_trios = NumberOfChainOrPlane(2);
+  int num_planes = num_trios * (Combination(kNumRanks - 2, 2) - 1);
+  if (repeated_kickers) {
+    num_planes += num_trios * (kNumCardsPerSuit - 2);
+  }
+  return num_planes;
+}
+
+constexpr int GetNumLength3PlaneWithSolo(const bool repeated_kickers) {
+  constexpr int num_trios = NumberOfChainOrPlane(3);
+  int num_planes = num_trios * (Combination(kNumRanks - 3, 3) - (kNumCardsPerSuit - 3));
+  if (repeated_kickers) {
+    num_planes += num_trios * (kNumCardsPerSuit - 3);
+    num_planes += num_trios * ((kNumCardsPerSuit - 3) * Combination(kNumRanks - 4, 1));
+    num_planes -= (1 * 2 + 2 * 8);
+  }
+  return num_planes;
+}
+
+constexpr int GetNumLength4PlaneWithSolo(const bool repeated_kickers) {
+  constexpr int num_trios = NumberOfChainOrPlane(4);
+  int num_planes = num_trios * (Combination(kNumRanks - 4, 4) - Combination(kNumCardsPerSuit - 4, 2));
+  if (repeated_kickers) {
+    num_planes += num_trios * (kNumCardsPerSuit - 4) * Combination(kNumRanks - 5, 1);
+    num_planes += num_trios * (kNumCardsPerSuit - 4) * (Combination(kNumRanks - 5, 2) - 1);
+    num_planes += num_trios * Combination(kNumCardsPerSuit - 4, 2);
+    num_planes -= (2 * 1 * (kNumRanks - 5) + 7 * 2 * (kNumRanks - 5));
+  }
+  return num_planes;
+}
+
+constexpr int GetNumLength5PlaneWithSolo(const bool repeated_kickers) {
+  constexpr int num_trios = NumberOfChainOrPlane(5);
+  int num_planes = num_trios * (Combination(kNumRanks - 5, 5) - Combination(kNumCardsPerSuit - 5, 3));
+  if (repeated_kickers) {
+    num_planes += num_trios * ((kNumCardsPerSuit - 5) * (kNumCardsPerSuit - 6));
+    num_planes += num_trios * ((kNumCardsPerSuit - 5) * (Combination(kNumRanks - 6, 2) - 1));
+    num_planes += num_trios * (Combination(kNumCardsPerSuit - 5, 2) * (kNumRanks - 7));
+    num_planes += num_trios * ((kNumCardsPerSuit - 5)
+      * (Combination(kNumRanks - 6, 3) - (kNumCardsPerSuit - 6)));
+    num_planes -= (2 * 1 * (kNumCardsPerSuit - 6 + Combination(kNumRanks - 6, 2) - 1)
+      + 6 * 2 * (kNumCardsPerSuit - 6 + Combination(kNumRanks - 6, 2)
+        - 1));
+  }
+  return num_planes;
+}
+
+constexpr int GetNumPlaneWithSoloByLength(const int length, const bool repeated_kickers) {
+  switch (length) {
+    case 2:
+      return GetNumLength2PlaneWithSolo(repeated_kickers);
+    case 3:
+      return GetNumLength3PlaneWithSolo(repeated_kickers);
+    case 4:
+      return GetNumLength4PlaneWithSolo(repeated_kickers);
+    case 5:
+      return GetNumLength5PlaneWithSolo(repeated_kickers);
+    default:
+      FatalError("Plane length" + std::to_string(length) + " is illegal.");
+  }
+}
+
+constexpr int GetNumPlaneWithSolo(const bool repeated_kickers) {
+  int sum = 0;
+  for (int l = kPlaneWithSoloMinLength; l <= kPlaneWithSoloMaxLength; l++) {
+    sum += GetNumPlaneWithSoloByLength(l, repeated_kickers);
+  }
+  return sum;
+}
+
+constexpr int GetNumQuadWithSolo(const bool repeated_kickers) {
+  int num = kNumCardsPerSuit * (Combination(kNumRanks - 1, 2) - 1);
+  if (repeated_kickers) {
+    num += kNumCardsPerSuit * (kNumCardsPerSuit - 1);
+  }
+  return num;
+}
+
+// inline constexpr int a = GetNumLength5PlaneWithSolo(true);
+// inline constexpr int b = GetNumLength5PlaneWithSolo(false);
+
 inline constexpr int kNumLength2PlaneWithSolos = 11 * (kNumCardsPerSuit - 2 // 2 same cards.
-    + Combination(kNumRanks - 2, 2) - 1); // 2 different cards except Rocket.
+  + Combination(kNumRanks - 2, 2) - 1); // 2 different cards except Rocket.
 inline constexpr int kNumLength3PlaneWithSolos = 10 * (kNumCardsPerSuit - 3 // 3 same cards.
-    + ((kNumCardsPerSuit - 3) * Combination(kNumRanks - 4, 1)) // 2 same cards and a different card.
-    + Combination(kNumRanks - 3, 3) - (kNumCardsPerSuit - 3)) // 3 different cards.
-    - (1 * 2 + 2
-        * 8); // Remove combinations like 333444555666 for consistency since they're not treated as plane with solos in RLCard.
+      + ((kNumCardsPerSuit - 3) * Combination(kNumRanks - 4, 1)) // 2 same cards and a different card.
+      + Combination(kNumRanks - 3, 3) - (kNumCardsPerSuit - 3)) // 3 different cards.
+    - (1 * 2 + 2 * 8);
+// Remove combinations like 333444555666 for consistency since they're not treated as plane with solos in RLCard.
 
 inline constexpr int kNumLength4PlaneWithSolos = 9 * (
-    ((kNumCardsPerSuit - 4) * Combination(kNumRanks - 5, 1)) // 3 same cards and a different card.
-        + ((kNumCardsPerSuit - 4) * (Combination(kNumRanks - 5, 2) - 1)) // 2 same cards and 2 different cards.
-        + Combination(kNumCardsPerSuit - 4, 2) // 2 pairs
-        + (Combination(kNumRanks - 4, 4) - Combination(kNumCardsPerSuit - 4, 2))) // 4 different cards
-    - (2 * 1 * (kNumRanks - 5) + 7 * 2 * (kNumRanks
-        - 5)); // Remove combinations like 333444555666777x for consistency since they're not treated as plane with solos in RLCard.
+      ((kNumCardsPerSuit - 4) * Combination(kNumRanks - 5, 1)) // 3 same cards and a different card.
+      + ((kNumCardsPerSuit - 4) * (Combination(kNumRanks - 5, 2) - 1)) // 2 same cards and 2 different cards.
+      + Combination(kNumCardsPerSuit - 4, 2) // 2 pairs
+      + (Combination(kNumRanks - 4, 4) - Combination(kNumCardsPerSuit - 4, 2))) // 4 different cards
+    - (2 * 1 * (kNumRanks - 5) + 7 * 2 * (kNumRanks - 5));
+// Remove combinations like 333444555666777x for consistency since they're not treated as plane with solos in RLCard.
 
 inline constexpr int kNumLength5PlaneWithSolos = 8 * (
-    ((kNumCardsPerSuit - 5) * (kNumCardsPerSuit - 6)) // 3 same cards and a pair.
-        + ((kNumCardsPerSuit - 5) * (Combination(kNumRanks - 6, 2) - 1)) // 3 same cards and 2 different cards.
-        + (Combination(kNumCardsPerSuit - 5, 2) * (kNumRanks - 7)) // 2 pairs and a different card.
-        + ((kNumCardsPerSuit - 5)
-            * (Combination(kNumRanks - 6, 3) - (kNumCardsPerSuit - 6))) // A pair and 3 different cards.
-        + (Combination(kNumRanks - 5, 5) - Combination(kNumCardsPerSuit - 5, 3)))   // 5 different cards
+      ((kNumCardsPerSuit - 5) * (kNumCardsPerSuit - 6)) // 3 same cards and a pair.
+      + ((kNumCardsPerSuit - 5) * (Combination(kNumRanks - 6, 2) - 1)) // 3 same cards and 2 different cards.
+      + (Combination(kNumCardsPerSuit - 5, 2) * (kNumRanks - 7)) // 2 pairs and a different card.
+      + ((kNumCardsPerSuit - 5)
+        * (Combination(kNumRanks - 6, 3) - (kNumCardsPerSuit - 6))) // A pair and 3 different cards.
+      + (Combination(kNumRanks - 5, 5) - Combination(kNumCardsPerSuit - 5, 3))) // 5 different cards
     - (2 * 1 * (kNumCardsPerSuit - 6 + Combination(kNumRanks - 6, 2) - 1)
-        + 6 * 2 * (kNumCardsPerSuit - 6 + Combination(kNumRanks - 6, 2)
-            - 1)); // Remove combinations like 333444555666777888xx for consistency since they're not treated as plane with solos in RLCard.
+      + 6 * 2 * (kNumCardsPerSuit - 6 + Combination(kNumRanks - 6, 2)
+        - 1));
+// Remove combinations like 333444555666777888xx for consistency since they're not treated as plane with solos in RLCard.
 
 inline constexpr int kNumPlaneWithSolos =
     kNumLength2PlaneWithSolos + kNumLength3PlaneWithSolos + kNumLength4PlaneWithSolos + kNumLength5PlaneWithSolos;
@@ -138,17 +221,63 @@ inline constexpr int kNumLength2PlaneWithPairs = 11 * Combination(kNumCardsPerSu
 inline constexpr int kNumLength3PlaneWithPairs = 10 * Combination(kNumCardsPerSuit - 3, 3);
 inline constexpr int kNumLength4PlaneWithPairs = 9 * Combination(kNumCardsPerSuit - 4, 4);
 inline constexpr int
-    kNumPlaneWithPairs = kNumLength2PlaneWithPairs + kNumLength3PlaneWithPairs + kNumLength4PlaneWithPairs;
+kNumPlaneWithPairs = kNumLength2PlaneWithPairs + kNumLength3PlaneWithPairs + kNumLength4PlaneWithPairs;
 
 inline constexpr int kNumQuadWithPairs = kNumCardsPerSuit * Combination(kNumCardsPerSuit - 1, 2);
 inline constexpr int kNumQuadWithSolos = kNumCardsPerSuit * (
-    kNumCardsPerSuit - 1 // A pair
-        + Combination(kNumRanks - 1, 2) - 1 // 2 different cards.
+  kNumCardsPerSuit - 1 // A pair
+  + Combination(kNumRanks - 1, 2) - 1 // 2 different cards.
 );
 
 inline constexpr int kNumBombs = kNumCardsPerSuit;
 inline constexpr int kNumRockets = 1; // BR.
 inline constexpr int kNumPasses = 1;
+
+inline constexpr int kSpaceShuttleMinLength = 2;
+inline constexpr int kSpaceShuttleMaxLength = kNumDizhuCards / kQuadLength;
+inline constexpr int kSpaceShuttleWithSoloMaxLength = kNumDizhuCards / (kQuadLength + 1);
+inline constexpr int kSpaceShuttleWithPairMaxLength = kNumDizhuCards / (kQuadLength + kPairLength);
+
+constexpr int GetNumSpaceShuttleByLength(const int length) {
+  return NumberOfChainOrPlane(length);
+}
+
+constexpr int GetNumSpaceShuttleWithSoloByLength(const int length) {
+  return NumberOfChainOrPlane(length) * (
+    Combination(/*n=*/kNumRanks - length, /*r=*/length)
+    - Combination(/*n=*/kNumRanks - length - 2, length - 2)
+  );
+}
+
+constexpr int GetNumSpaceShuttleWithPairByLength(const int length) {
+  return NumberOfChainOrPlane(length) * (
+    Combination(/*n=*/kNumCardsPerSuit - length, /*r=*/length)
+  );
+}
+
+constexpr int GetNumSpaceShuttle() {
+  int sum = 0;
+  for (int length = kSpaceShuttleMinLength; length <= kSpaceShuttleMaxLength; length++) {
+    sum += NumberOfChainOrPlane(length);
+  }
+  return sum;
+}
+
+constexpr int GetNumSpaceShuttleWithSolo() {
+  int sum = 0;
+  for (int length = kSpaceShuttleMinLength; length <= kSpaceShuttleWithSoloMaxLength; length++) {
+    sum += GetNumSpaceShuttleWithSoloByLength(length);
+  }
+  return sum;
+}
+
+constexpr int GetNumSpaceShuttleWithPair() {
+  int sum = 0;
+  for (int length = kSpaceShuttleMinLength; length <= kSpaceShuttleWithPairMaxLength; length++) {
+    sum += GetNumSpaceShuttleWithPairByLength(length);
+  }
+  return sum;
+}
 
 inline constexpr int kNumDistinctPlayMoves = kNumSolos
     + kNumPairs
@@ -172,8 +301,7 @@ inline constexpr int kNumDistinctMoves =
 constexpr char kSuitChar[] = "CDHS";
 constexpr char kRankChar[] = "3456789TJQKA2BR";
 
-int RankCharToRank(const char& rank_char);
-Suit SuitCharToSuit(const char& suit_char);
-
+int RankCharToRank(const char &rank_char);
+Suit SuitCharToSuit(const char &suit_char);
 }
 #endif //DOUDIZHU_LEARNING_ENVIRONMENT_DOUDIZHU_LIB_DOUDIZHU_UTILS_H_
