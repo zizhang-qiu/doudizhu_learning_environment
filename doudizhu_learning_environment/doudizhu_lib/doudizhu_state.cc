@@ -424,10 +424,6 @@ void SearchForPlaneMoves(const DoudizhuHand &current_hand,
                          const DoudizhuMove &rival_move,
                          std::vector<DoudizhuMove> &moves,
                          const bool allow_repeated_kickers) {
-  //  std::cout << current_hand.ToString() << std::endl;
-  //  if (current_hand.ToString() == "RB22KQQJ888777766633"){
-  //    std::cout << "gotcha!" << std::endl;
-  //  }
   const auto cards_per_rank = current_hand.CardsPerRank();
   if (rival_move.GetPlane().kicker_type == kSolo) {
     const int plane_length = rival_move.GetPlane().length;

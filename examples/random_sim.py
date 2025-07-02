@@ -39,8 +39,9 @@ if __name__ == '__main__':
             print(legal_move_uids)
             legal_moves2 = [game.get_move(uid) for uid in legal_move_uids]
             print(legal_moves2)
-            for move, uid, move2 in zip(legal_moves, legal_move_uids, legal_moves2):
-                print(move, uid, move2)
+            assert legal_moves == legal_moves2
+            # for move, uid, move2 in zip(legal_moves, legal_move_uids, legal_moves2):
+            #     print(move, uid, move2)
             random_move = random.choice(legal_moves2)
             print(state)
             print(random_move)

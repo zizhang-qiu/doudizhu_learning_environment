@@ -17,4 +17,7 @@ if (DEFINED Python_EXECUTABLE)
 endif ()
 
 add_subdirectory(doudizhu_learning_environment/doudizhu_lib)
-add_subdirectory(doudizhu_learning_environment)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_subdirectory(doudizhu_learning_environment)
+endif()
